@@ -8,29 +8,80 @@
     <link rel="stylesheet" href="/CSS/style.css">
 </head>
 <body>
+    <!-- <canvas class="background-canvas"></canvas> -->
     <div class="logo-bar px-4">
-        <div><img src="/assets/img/mdti-logo.png" alt="Logo" height="50"></div>
+        <div><a href="https://www.macrologic.com.ph/" target="_blank"><img src="/assets/img/mdti-logo.png" alt="Logo" height="50"></a></div>
         <div>
             <!--asdfasdf -->
         </div>
-    </div>    
-    <div class="login-container">
-        <div class="login-form">
-            <h2>Log In</h2>
-            <form>
-                <input type="email" class="form-control" placeholder="Email">
-                <input type="password" class="form-control" placeholder="Password">
-                <button type="submit" class="btn btn-login w-100">Sign In</button>
-                <div class="text-center mt-3">
-                    <a href="#" class="forgot-link">Forgot password?</a>
-                </div>
-            </form>
+    </div>  
+        <div class="login-container">
+            <div class="login-form">
+                <h2>Log In</h2>
+                <form>
+                    <input type="email" class="form-control" placeholder="Email">
+                    <input type="password" class="form-control" placeholder="Password">
+                    <button type="submit" class="btn btn-login w-100">Sign In</button>
+                    <div class="text-center mt-3">
+                        <a href="#" class="forgot-link">Forgot password?</a>
+                    </div>
+                </form>
+            </div>
+            <div class="welcome-section">
+                <h2>Welcome</h2>
+                <h4><span>S</span>olutions <span>A</span>rchitect</h4>
+                <img src="/assets/img/login_img.png" alt="Illustration" class="illustration">
+            </div>
         </div>
-        <div class="welcome-section">
-            <h2>Welcome</h2>
-            <h4><span>S</span>olutions <span>A</span>rchitect</h4>
-            <img src="/assets/img/login_img.png" alt="Illustration" class="illustration">
-        </div>
-    </div>
+    <!-- <script>
+        // JavaScript to draw repeating slanted text on the canvas
+        const canvas = document.querySelector('.background-canvas');
+        const ctx = canvas.getContext('2d');
+
+        // Set canvas size
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        // Text settings
+        const text = "Macrologic Solutions Architect";
+        const fontSize = 50;
+        const textColor = 'rgba(0, 51, 102, 0.1)';  // Light blue with transparency
+        const angle = Math.PI / 9;  // 45 degrees slanting
+
+        // Function to draw slanted repeating text across the entire canvas
+        function drawRepeatingText() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);  // Clear previous drawing
+        ctx.fillStyle = textColor;
+        ctx.font = `${fontSize}px Arial`;
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+
+        const textWidth = ctx.measureText(text).width;
+        const padding = 20; // Space between the repeated texts
+        let xPos = -textWidth;  // Start position for the text
+        let yPos = fontSize; // Start position for the first row of text
+
+        // Draw the text repeatedly to cover the entire canvas
+        for (let i = 0; yPos < canvas.height + fontSize; yPos += fontSize + padding) {
+            for (xPos = -textWidth; xPos < canvas.width + textWidth; xPos += textWidth + padding) {
+            ctx.save();
+            ctx.translate(xPos, yPos);
+            ctx.rotate(angle);
+            ctx.fillText(text, 0, 0);
+            ctx.restore();
+            }
+        }
+        }
+
+        // Redraw the text whenever the window is resized
+        window.addEventListener('resize', () => {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+        drawRepeatingText();
+        });
+
+        // Initial drawing
+        drawRepeatingText();
+    </script> -->
 </body>
 </html>
