@@ -99,7 +99,7 @@
             <select class="flex-1 border border-gray-300 rounded-md p-2">
               <option>Select customer</option>
             </select>
-            <button type="button" class="bg-white border px-3 rounded">+</button>
+            <button type="button" id="openModal" class="bg-white border px-3 rounded">+</button>
           </div>
         </div>
         <div>
@@ -108,7 +108,7 @@
             <select class="flex-1 border border-gray-300 rounded-md p-2">
               <option>Select account manager</option>
             </select>
-            <button type="button" class="bg-white border px-3 rounded">+</button>
+            <button type="button" id="openAccModal" class="bg-white border px-3 rounded">+</button>
           </div>
         </div>
       </div>
@@ -118,7 +118,7 @@
           <label class="block text-sm font-medium">Meeting Participants</label>
           <div class="flex gap-2 mt-1">
             <input type="text" class="flex-1 border border-gray-300 rounded-md p-2" placeholder="Add participant name" />
-            <button type="button" class="bg-gray-800 text-white px-3 rounded">+</button>
+            <button type="button" class="bg-gray-800 text-white px-3 rounded"><svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" /></svg></button>
           </div>
         </div>
         <div>
@@ -163,7 +163,7 @@
     </form>
     </div>
   </div>
-  <!-- JavaScript to Toggle Fields -->
+  <script src="/JS/modal.js"></script>
   <script>
     const categorySelect = document.getElementById("activityCategory");
     const knowledgeFields = document.getElementById("knowledgeFields");
