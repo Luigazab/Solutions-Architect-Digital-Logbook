@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Activity Reports</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-50">
+  <nav class="bg-[#003D69] text-white px-4 py-4 shadow-sm shadow-gray-300 flex justify-between items-center">
+    <div>
+      <h1 class="text-2xl font-bold leading-tight">SolArch</h1>
+      <p class="text-sm text-slate-300">Solution Architect Activity Tracker</p>
+    </div>
+    <div class="flex items-center gap-4">
+      <span class="text-sm">luishagailcanonoy@gmail.com</span>
+      <a href="auth.html" class="bg-gray-100 text-sm font-medium text-gray-800 border border-gray-300 px-4 py-2 rounded hover:bg-slate-300">Sign Out</a>
+    </div>
+  </nav>
+
+  <!-- Filters -->
+   <div class="p-6 max-w-8xl mx-auto space-y-4">
+    <div class="bg-white p-4 rounded-xl shadow">
+      <div class="flex justify-between">
+        <h2 class="text-2xl font-semibold mb-4">Report Filters</h2>
+        <label class="flex items-center gap-2 h-10 w-full max-w-md rounded-md border border-input bg-background px-3 py-2 text-base text-muted-foreground focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2 md:text-sm">
+          <svg class="w-5 h-5 text-gray-500" viewBox="0 0 15 15" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path fill-rule="evenodd" clip-rule="evenodd" d="M10 6.5a3.5 3.5 0 1 1-7 0 3.5 3.5 0 0 1 7 0m-.691 3.516a4.5 4.5 0 1 1 .707-.707l2.838 2.837a.5.5 0 0 1-.708.708z" fill="#000"/>
+          </svg>
+          <input type="text" placeholder="Search customers..." class="w-full bg-transparent outline-none placeholder:text-muted-foreground" />
+        </label>
+      </div>
+    <div class="grid grid-cols-1 sm:grid-cols-4 gap-4">
+      <div>
+        <label class="block text-sm font-medium mb-1">Time Period</label>
+        <select class="w-full border rounded-lg p-2">
+          <option>Current Month</option>
+          <option>Last Month</option>
+        </select>
+      </div>
+      <div>
+        <label class="block text-sm font-medium mb-1">Category</label>
+        <select class="w-full border rounded-lg p-2">
+          <option>All Categories</option>
+        </select>
+      </div>
+      <div>
+        <label class="block text-sm font-medium mb-1">Solutions Architect</label>
+        <select class="w-full border rounded-lg p-2">
+          <option>All SolArch</option>
+          <option>Reggie</option>
+          <option>Klien</option>
+          <option>Rommel</option>
+        </select>
+      </div>
+      <div>
+        <label class="block text-sm font-medium mb-1">Action</label>
+        <div class="flex justify-between text-center gap-4">
+          <a href="log_activity.html" class="w-full border rounded-lg p-2 bg-slate-700 font-medium text-neutral-100 hover:bg-slate-800 hover:text-neutral-200">Log Activity</a>
+          <a href="" class="w-full border rounded-lg p-2 bg-emerald-700 font-medium text-neutral-100 hover:bg-teal-800 hover:text-neutral-200">Export CSV</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Summary Cards -->
+  <div class="grid grid-cols-1 sm:grid-cols-4 lg:grid-cols-4 gap-4 mb-6">
+    <div class="bg-red-100 p-4 rounded-xl border">
+      <div class="flex justify-between">
+        <p class="text-neutral-800 font-semibold text-sm">Total Activities</p>
+        <span><svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 384 512"><path d="M249.9 66.8c10.4-14.3 7.2-34.3-7.1-44.7s-34.3-7.2-44.7 7.1l-106 145.7-37.5-37.5c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3l64 64c6.6 6.6 15.8 10 25.1 9.3s17.9-5.5 23.4-13.1l128-176zm128 136c10.4-14.3 7.2-34.3-7.1-44.7s-34.3-7.2-44.7 7.1l-170 233.7-69.5-69.5c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3l96 96c6.6 6.6 15.8 10 25.1 9.3s17.9-5.5 23.4-13.1l192-264z"/></svg></span>
+      </div>
+      <p class="text-2xl mt-2 font-bold">2</p>
+      <p class="text-sm text-gray-500">Tracked</p>
+    </div>
+    <div class="bg-yellow-100 p-4 rounded-xl border">
+      <div class="flex justify-between">
+        <p class="text-neutral-800 font-semibold text-sm">Average Activities</p>
+        <span><svg class="w-5 h-5" viewBox="0 0 52 52" data-name="Layer 1" xmlns="http://www.w3.org/2000/svg"><path d="M39.55 26A10.5 10.5 0 1 0 50 36.5 10.5 10.5 0 0 0 39.55 26m0 16.14a5.65 5.65 0 1 1 5.6-5.64 5.64 5.64 0 0 1-5.6 5.64M23 15.5a10.48 10.48 0 1 0-3.07 7.43A10.5 10.5 0 0 0 23 15.5m-10.5 5.64a5.65 5.65 0 1 1 4-1.65 5.63 5.63 0 0 1-4.01 1.65Zm26.71-15A.8.8 0 0 0 38.49 5h-3a.83.83 0 0 0-.64.4l-22 40.41a.78.78 0 0 0 0 .78.79.79 0 0 0 .68.39h3a.8.8 0 0 0 .64-.4l22-40.41Z"/></svg></span>
+      </div>
+      <p class="text-2xl mt-2 font-bold">2</p>
+      <p class="text-sm text-gray-500">Per month</p>
+    </div>
+    <div class="bg-green-100 p-4 rounded-xl border">
+      <div class="flex justify-between">
+        <p class="text-neutral-800 font-semibold text-sm">Total Certifications</p>
+        <span><svg class="w-5 h-5" viewBox="0 0 15 15" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M9.5 14.5H9a.5.5 0 0 0 .8.4zm2-1.5.3-.4a.5.5 0 0 0-.6 0zm2 1.5-.3.4a.5.5 0 0 0 .8-.4zm-2-3.5A2.5 2.5 0 0 1 9 8.5H8a3.5 3.5 0 0 0 3.5 3.5zM14 8.5a2.5 2.5 0 0 1-2.5 2.5v1A3.5 3.5 0 0 0 15 8.5zM11.5 6A2.5 2.5 0 0 1 14 8.5h1A3.5 3.5 0 0 0 11.5 5zm0-1A3.5 3.5 0 0 0 8 8.5h1A2.5 2.5 0 0 1 11.5 6zM9 10.5v4h1v-4zm.8 4.4 2-1.5-.6-.8-2 1.5zm1.4-1.5 2 1.5.6-.8-2-1.5zm2.8 1.1v-4h-1v4zM15 5V1.5h-1V5zm-1.5-5h-12v1h12zM0 1.5v12h1v-12zM1.5 15H8v-1H1.5zM0 13.5A1.5 1.5 0 0 0 1.5 15v-1a.5.5 0 0 1-.5-.5zM1.5 0A1.5 1.5 0 0 0 0 1.5h1a.5.5 0 0 1 .5-.5zM15 1.5A1.5 1.5 0 0 0 13.5 0v1a.5.5 0 0 1 .5.5zM3 5h5V4H3zm0 3h3V7H3z" fill="#000"/></svg></span>
+      </div>
+      <p class="text-2xl mt-2 font-bold">4</p>
+      <p class="text-sm text-gray-500">Attained Certification</p>
+    </div>
+    <div class="bg-blue-100 p-4 rounded-xl border">
+      <div class="flex justify-between">
+        <p class="text-neutral-800 font-semibold text-sm">Total Activities</p>
+        <span><svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 384 512"><path d="M249.9 66.8c10.4-14.3 7.2-34.3-7.1-44.7s-34.3-7.2-44.7 7.1l-106 145.7-37.5-37.5c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3l64 64c6.6 6.6 15.8 10 25.1 9.3s17.9-5.5 23.4-13.1l128-176zm128 136c10.4-14.3 7.2-34.3-7.1-44.7s-34.3-7.2-44.7 7.1l-170 233.7-69.5-69.5c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3l96 96c6.6 6.6 15.8 10 25.1 9.3s17.9-5.5 23.4-13.1l192-264z"/></svg></span>
+      </div>
+      <p class="text-2xl mt-2 font-bold">2</p>
+      <p class="text-sm text-gray-500">Tracked</p>
+    </div>
+  </div>
+
+  <!-- Activity Breakdown + Customer Activity -->
+  <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
+    <div class="bg-white p-4 rounded-xl shadow">
+      <h3 class="font-semibold mb-2">Activity Breakdown</h3>
+      <ul class="space-y-2">
+        <li class="flex justify-between">
+          <span class="inline-flex items-center rounded-md bg-red-50 px-2 py-1 text-xs font-medium text-red-700 ring-1 ring-red-600/10 ring-inset">Client Visit</span>
+          <span>1 activities</span>
+        </li>
+        <li class="flex justify-between">
+          <span class="inline-flex items-center rounded-md bg-yellow-50 px-2 py-1 text-xs font-medium text-yellow-800 ring-1 ring-yellow-600/20 ring-inset">Meetings Attended</span>
+          <span>2 activities</span>
+        </li>
+        <li class="flex justify-between">
+          <span class="inline-flex items-center rounded-md bg-green-50 px-2 py-1 text-xs font-medium text-green-700 ring-1 ring-green-600/20 ring-inset">Enablement</span>
+          <span>2 activities</span>
+        </li>
+        <li class="flex justify-between">
+          <span class="inline-flex items-center rounded-md bg-blue-50 px-2 py-1 text-xs font-medium text-blue-700 ring-1 ring-blue-700/10 ring-inset">Attended Event</span>
+          <span>2 activities</span>
+        </li>
+        <li class="flex justify-between">
+          <span class="inline-flex items-center rounded-md bg-indigo-50 px-2 py-1 text-xs font-medium text-indigo-700 ring-1 ring-indigo-700/10 ring-inset">Technical Training</span>
+          <span>2 activities</span>
+        </li>
+        <li class="flex justify-between">
+          <span class="inline-flex items-center rounded-md bg-purple-50 px-2 py-1 text-xs font-medium text-purple-700 ring-1 ring-purple-700/10 ring-inset">Product Knowledge</span>
+          <span>2 activities</span>
+        </li>
+      </ul>
+    </div>
+    <div class="bg-white p-4 rounded-xl shadow flex flex-col items-center justify-center text-gray-400">
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5.121 17.804A9.958 9.958 0 0112 15c2.21 0 4.244.72 5.879 1.93M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+      </svg>
+      <p>No customer activities in selected period</p>
+    </div>
+  </div>
+
+  <!-- Activity Details -->
+  <div class="bg-white p-4 rounded-xl shadow">
+    <h3 class="font-semibold mb-4">Activity Details</h3>
+    <table class="w-full text-left border-t border-gray-200">
+      <thead>
+        <tr class="text-gray-500 text-sm">
+          <th class="py-2">Date</th>
+          <th class="py-2">Title</th>
+          <th class="py-2">Category</th>
+          <th class="py-2">Location</th>
+          <th class="py-2">Customer</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr class="border-t hover:bg-gray-50">
+          <td class="py-2">Aug 13, 2025</td>
+          <td>Example</td>
+          <td><span class="bg-blue-100 text-blue-600 px-2 py-1 rounded-lg text-xs">client visit</span></td>
+          <td>Virtual</td>
+          <td>No customer</td>
+        </tr>
+        <tr class="border-t hover:bg-gray-50">
+          <td class="py-2">Aug 2, 2025</td>
+          <td>Sample title</td>
+          <td><span class="bg-blue-100 text-blue-600 px-2 py-1 rounded-lg text-xs">meetings attended</span></td>
+          <td>Onsite</td>
+          <td>No customer</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+   </div>
+  
+
+</body>
+</html>
