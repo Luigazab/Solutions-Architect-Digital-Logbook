@@ -9,15 +9,26 @@
 <body class="bg-slate-100 text-gray-800">
   <!-- Navbar -->
   <nav class="bg-[#003D69] text-white px-4 py-4 shadow-sm shadow-gray-300 flex justify-between items-center">
-    <div>
-      <h1 class="text-2xl font-bold leading-tight">SolArch</h1>
-      <p class="text-sm text-slate-300">Solution Architect Activity Tracker</p>
+    <a href="dashboard.html">
+      <div>
+        <h1 class="text-2xl font-bold leading-tight">SolArch</h1>
+        <p class="text-sm text-slate-300">Solution Architect Activity Tracker</p>
+      </div>
+    </a>
+    <div class="flex items-center justify-between text-md font-bold leading-tight space-x-6">
+      <a href="dashboard.html" class="text-neutral-100 font-semibold hover:underline">Home</a>
+      <a href="log_activity.html" class="text-orange-900 font-semibold p-2 rounded bg-orange-200 border-1 border-orange-500">Log Activity</a>
+      <a href="schedule.html" class="text-neutral-100 font-semibold hover:underline">Schedule</a>
+      <a href="activity.html" class="text-neutral-100 font-semibold hover:underline">Reports</a>
+      <a href="certificate.html" class="text-neutral-100 font-semibold hover:underline">Certifications</a>
+      <a href="customers.html" class="text-neutral-100 font-semibold hover:underline">Customer Information</a>
     </div>
     <div class="flex items-center gap-4">
       <span class="text-sm">luishagailcanonoy@gmail.com</span>
       <a href="auth.html" class="bg-gray-100 text-sm font-medium text-gray-800 border border-gray-300 px-4 py-2 rounded hover:bg-slate-300">Sign Out</a>
     </div>
   </nav>
+
   
   <div class="max-w-2xl mx-auto p-2 space-y-4">
     <a href="dashboard.html" class="text-md font-semibold text-neutral-800 hover:underline">&larr; Back to Dashboard</a>
@@ -158,11 +169,13 @@
 
       <div class="flex justify-end gap-2">
         <button type="submit" class="bg-gray-900 text-white px-6 py-2 rounded-md hover:bg-black">Save Activity</button>
-        <a href="dashboard.php" class="border border-gray-300 px-6 py-2 rounded-md text-gray-700 hover:bg-gray-100">Cancel</a>
+        <a href="dashboard.html" class="border border-gray-300 px-6 py-2 rounded-md text-gray-700 hover:bg-gray-100">Cancel</a>
       </div>
     </form>
     </div>
   </div>
+  <div id="footer"></div>
+  <script src="/JS/DRY.js"></script>
   <script src="/JS/modal.js"></script>
   <script>
     const categorySelect = document.getElementById("activityCategory");
