@@ -5,8 +5,13 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Activity Reports</title>
   <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+  * {
+    transition: all 300ms ease-in-out;
+  }
+</style>
 </head>
-<body class="bg-gray-50">
+<body class="bg-slate-100 text-gray-800">
   <nav class="bg-[#003D69] text-white px-4 py-4 shadow-sm shadow-gray-300 flex justify-between items-center">
     <a href="dashboard.html">
       <div>
@@ -20,7 +25,7 @@
       <a href="schedule.html" class="text-neutral-100 font-semibold hover:underline">Schedule</a>
       <a href="activity.html" class="text-orange-900 font-semibold p-2 rounded bg-orange-200 border-1 border-orange-500">Reports</a>
       <a href="certificate.html" class="text-neutral-100 font-semibold hover:underline">Certifications</a>
-      <a href="activity.html" class="text-neutral-100 font-semibold hover:underline">Customer Information</a>
+      <a href="customers.html" class="text-neutral-100 font-semibold hover:underline">Customer Information</a>
     </div>
     <div class="flex items-center gap-4">
       <span class="text-sm">luishagailcanonoy@gmail.com</span>
@@ -29,52 +34,51 @@
   </nav>
 
   <!-- Filters -->
-   <div class="p-6 max-w-8xl mx-auto space-y-4">
+  <div class="p-6 max-w-8xl mx-auto space-y-4">
     <div class="bg-white p-4 rounded-xl shadow">
       <div class="flex justify-between">
-        <h2 class="text-2xl font-semibold mb-4">Report Filters</h2>
-        <label class="flex items-center gap-2 h-10 w-full max-w-md rounded-md border border-input bg-background px-3 py-2 text-base text-muted-foreground focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2 md:text-sm">
+          <h2 class="text-2xl font-semibold mb-4">Report Filters</h2>
+          <label class="flex items-center gap-2 h-10 w-full max-w-md rounded-md border border-input bg-background px-3 py-2 text-base text-muted-foreground focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2 md:text-sm">
           <svg class="w-5 h-5 text-gray-500" viewBox="0 0 15 15" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path fill-rule="evenodd" clip-rule="evenodd" d="M10 6.5a3.5 3.5 0 1 1-7 0 3.5 3.5 0 0 1 7 0m-.691 3.516a4.5 4.5 0 1 1 .707-.707l2.838 2.837a.5.5 0 0 1-.708.708z" fill="#000"/>
+              <path fill-rule="evenodd" clip-rule="evenodd" d="M10 6.5a3.5 3.5 0 1 1-7 0 3.5 3.5 0 0 1 7 0m-.691 3.516a4.5 4.5 0 1 1 .707-.707l2.838 2.837a.5.5 0 0 1-.708.708z" fill="#000"/>
           </svg>
           <input type="text" placeholder="Search customers..." class="w-full bg-transparent outline-none placeholder:text-muted-foreground" />
-        </label>
+          </label>
       </div>
-    <div class="grid grid-cols-1 sm:grid-cols-4 gap-4">
-      <div>
-        <label class="block text-sm font-medium mb-1">Time Period</label>
-        <select class="w-full border rounded-lg p-2">
-          <option>Current Month</option>
-          <option>Last Month</option>
-        </select>
-      </div>
-      <div>
-        <label class="block text-sm font-medium mb-1">Category</label>
-        <select class="w-full border rounded-lg p-2">
-          <option>All Categories</option>
-        </select>
-      </div>
-      <div>
-        <label class="block text-sm font-medium mb-1">Solutions Architect</label>
-        <select class="w-full border rounded-lg p-2">
-          <option>All SolArch</option>
-          <option>Reggie</option>
-          <option>Klien</option>
-          <option>Rommel</option>
-        </select>
-      </div>
-      <div>
-        <label class="block text-sm font-medium mb-1">Action</label>
-        <div class="flex justify-between text-center gap-4">
-          <a href="log_activity.html" class="w-full border rounded-lg p-2 bg-slate-700 font-medium text-neutral-100 hover:bg-slate-800 hover:text-neutral-200">Log Activity</a>
-          <a href="" class="w-full border rounded-lg p-2 bg-emerald-700 font-medium text-neutral-100 hover:bg-teal-800 hover:text-neutral-200">Export CSV</a>
+      <div class="grid grid-cols-1 sm:grid-cols-4 gap-4">
+        <div>
+          <label class="block text-sm font-medium mb-1">Time Period</label>
+          <select class="w-full border rounded-lg p-2">
+            <option>Current Month</option>
+            <option>Last Month</option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-sm font-medium mb-1">Category</label>
+          <select class="w-full border rounded-lg p-2">
+            <option>All Categories</option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-sm font-medium mb-1">Solutions Architect</label>
+          <select class="w-full border rounded-lg p-2">
+            <option>All SolArch</option>
+            <option>Reggie</option>
+            <option>Klien</option>
+            <option>Rommel</option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-sm font-medium mb-1">Action</label>
+          <div class="flex justify-between text-center gap-4">
+            <a href="log_activity.html" class="w-full border rounded-lg p-2 bg-slate-700 font-medium text-neutral-100 hover:bg-slate-800 hover:text-neutral-200">Log Activity</a>
+            <a href="" class="w-full border rounded-lg p-2 bg-emerald-700 font-medium text-neutral-100 hover:bg-teal-800 hover:text-neutral-200">Export CSV</a>
+          </div>
         </div>
       </div>
     </div>
-  </div>
 
-  <!-- Summary Cards -->
-  <div class="grid grid-cols-1 sm:grid-cols-4 lg:grid-cols-4 gap-4 mb-6">
+  <div class="grid grid-cols-1 sm:grid-cols-4 lg:grid-cols-4 lg:grid-row-2 gap-4 mb-6">
     <div class="bg-red-100 p-4 rounded-xl border">
       <div class="flex justify-between">
         <p class="text-neutral-800 font-semibold text-sm">Total Activities</p>
@@ -99,20 +103,57 @@
       <p class="text-2xl mt-2 font-bold">4</p>
       <p class="text-sm text-gray-500">Attained Certification</p>
     </div>
-    <div class="bg-blue-100 p-4 rounded-xl border">
-      <div class="flex justify-between">
-        <p class="text-neutral-800 font-semibold text-sm">Total Activities</p>
-        <span><svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 384 512"><path d="M249.9 66.8c10.4-14.3 7.2-34.3-7.1-44.7s-34.3-7.2-44.7 7.1l-106 145.7-37.5-37.5c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3l64 64c6.6 6.6 15.8 10 25.1 9.3s17.9-5.5 23.4-13.1l128-176zm128 136c10.4-14.3 7.2-34.3-7.1-44.7s-34.3-7.2-44.7 7.1l-170 233.7-69.5-69.5c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3l96 96c6.6 6.6 15.8 10 25.1 9.3s17.9-5.5 23.4-13.1l192-264z"/></svg></span>
+    <div class="bg-white p-4 rounded-xl border lg:row-span-2 md:row-span-2">
+      <div class="flex justify-between items-center">
+        <div>
+          <p class="text-2xl text-blue-900 font-semibold">Certifications</p>
+          <p class="text-md text-slate-700">per Solution Architect</p>
+        </div>
+        <span class="text-blue-900"><svg class="w-10 h-10" viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg" class="icon"><path fill="currentColor" d="M688 264c0-4.4-3.6-8-8-8H296c-4.4 0-8 3.6-8 8v48c0 4.4 3.6 8 8 8h384c4.4 0 8-3.6 8-8zm-8 136H296c-4.4 0-8 3.6-8 8v48c0 4.4 3.6 8 8 8h384c4.4 0 8-3.6 8-8v-48c0-4.4-3.6-8-8-8M480 544H296c-4.4 0-8 3.6-8 8v48c0 4.4 3.6 8 8 8h184c4.4 0 8-3.6 8-8v-48c0-4.4-3.6-8-8-8m-48 308H208V148h560v344c0 4.4 3.6 8 8 8h56c4.4 0 8-3.6 8-8V108c0-17.7-14.3-32-32-32H168c-17.7 0-32 14.3-32 32v784c0 17.7 14.3 32 32 32h264c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8m356.8-74.4c29-26.3 47.2-64.3 47.2-106.6 0-79.5-64.5-144-144-144s-144 64.5-144 144c0 42.3 18.2 80.3 47.2 106.6-57 32.5-96.2 92.7-99.2 162.1-.2 4.5 3.5 8.3 8 8.3h48.1c4.2 0 7.7-3.3 8-7.6C564 871.2 621.7 816 692 816s128 55.2 131.9 124.4c.2 4.2 3.7 7.6 8 7.6H880c4.6 0 8.2-3.8 8-8.3-2.9-69.5-42.2-129.6-99.2-162.1M692 591c44.2 0 80 35.8 80 80s-35.8 80-80 80-80-35.8-80-80 35.8-80 80-80"/></svg></span>
       </div>
-      <p class="text-2xl mt-2 font-bold">2</p>
-      <p class="text-sm text-gray-500">Tracked</p>
+      <hr class="mb-4">
+      <!-- one solution architect -->
+      <div class="flex flex-col justify-between gap-4">
+        <div class="flex justify-between items-center">
+          <div class="flex items-center space-x-2">
+            <img src="" class="w-5 h-5" alt="">
+            <div>
+              <h4 class="text-slate-900 font-semibold">Archi</h4>
+              <p class="text-sm text-slate-700">Solution Architect</p>
+            </div>
+          </div>  
+          <p class="text-2xl">20</p>
+        </div>
+        <hr>
+        <div class="flex justify-between items-center">
+          <div class="flex items-center space-x-2">
+            <img src="" class="w-5 h-5" alt="">
+            <div>
+              <h4 class="text-slate-900 font-semibold">Archi</h4>
+              <p class="text-sm text-slate-700">Solution Architect</p>
+            </div>
+          </div>  
+          <p class="text-2xl">20</p>
+        </div>
+        <hr>
+        <div class="flex justify-between items-center">
+          <div class="flex items-center space-x-2">
+            <img src="" class="w-5 h-5" alt="">
+            <div>
+              <h4 class="text-slate-900 font-semibold">Archi</h4>
+              <p class="text-sm text-slate-700">Solution Architect</p>
+            </div>
+          </div>  
+          <p class="text-2xl">20</p>
+        </div>
+        <hr>
+        <div class="flex justify-end">
+          <a href="certificate.html" class="bg-gray-100 text-sm font-medium text-gray-800 border border-gray-300 px-4 py-2 rounded hover:bg-slate-800 hover:text-neutral-200">View Certificates</a>
+        </div>
+      </div>
     </div>
-  </div>
-
-  <!-- Activity Breakdown + Customer Activity -->
-  <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
     <div class="bg-white p-4 sm:col-span-1 rounded-xl shadow">
-      <h3 class="font-semibold mb-2">Activity Breakdown</h3>
+      <h3 class="text-2xl font-semibold mb-2">Activity Breakdown</h3>
       <ul class="space-y-2">
         <li class="flex justify-between">
           <span class="inline-flex items-center rounded-md bg-red-50 px-2 py-1 text-xs font-medium text-red-700 ring-1 ring-red-600/10 ring-inset">Client Visit</span>
@@ -148,6 +189,7 @@
     </div>
   </div>
 
+
   <!-- Activity Details -->
   <div class="bg-white p-4 rounded-xl shadow">
     <h3 class="font-semibold mb-4">Activity Details</h3>
@@ -181,6 +223,7 @@
   </div>
    </div>
   
-
+<div id="footer"></div>
+  <script src="/JS/DRY.js"></script>
 </body>
 </html>
