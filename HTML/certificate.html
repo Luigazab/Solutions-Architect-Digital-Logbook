@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Activity Calendar</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-slate-100 text-gray-800">
+
+  <nav class="bg-[#003D69] text-white px-4 py-4 shadow-sm shadow-gray-300 flex justify-between items-center">
+    <a href="dashboard.html">
+      <div>
+        <h1 class="text-2xl font-bold leading-tight">SolArch</h1>
+        <p class="text-sm text-slate-300">Solution Architect Activity Tracker</p>
+      </div>
+    </a>
+    <div class="flex items-center justify-between text-md font-bold leading-tight space-x-6">
+      <a href="dashboard.html" class="text-neutral-100 font-semibold hover:underline">Home</a>
+      <a href="log_activity.html" class="text-neutral-100 font-semibold hover:underline">Log Activity</a>
+      <a href="schedule.html" class="text-neutral-100 font-semibold hover:underline">Schedule</a>
+      <a href="activity.html" class="text-neutral-100 font-semibold hover:underline">Reports</a>
+      <a href="certificate.html" class="text-orange-900 font-semibold p-2 rounded bg-orange-200 border-1 border-orange-500">Certifications</a>
+      <a href="customers.html" class="text-neutral-100 font-semibold hover:underline">Customer Information</a>
+    </div>
+    <div class="flex items-center gap-4">
+      <span class="text-sm">luishagailcanonoy@gmail.com</span>
+      <a href="auth.html" class="bg-gray-100 text-sm font-medium text-gray-800 border border-gray-300 px-4 py-2 rounded hover:bg-slate-300">Sign Out</a>
+    </div>
+  </nav>
+
+  <!-- Main Section -->
+  <main class="min-h-screen flex flex-col">
+    <div class="p-6 space-y-4 flex-grow">
+    <!-- Summary Cards -->
+    <div class="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-3 gap-4 mb-6">
+        <div class="bg-red-100 py-4 px-4 rounded-xl border flex justify-between items-center">
+            <div>
+                <p class="text-neutral-800 font-semibold text-md">Total Customers</p>
+                <p class="text-3xl font-bold">2</p>
+            </div>
+            <svg class="w-10 h-10" viewBox="0 0 24 24" version="1.2" baseProfile="tiny" xmlns="http://www.w3.org/2000/svg"><path d="M20 20H4c-1.654 0-3-1.346-3-3V7c0-1.654 1.346-3 3-3h16c1.654 0 3 1.346 3 3v10c0 1.654-1.346 3-3 3M4 6c-.551 0-1 .449-1 1v10c0 .551.449 1 1 1h16c.551 0 1-.449 1-1V7c0-.551-.449-1-1-1zm6 9H6a1 1 0 1 1 0-2h4a1 1 0 1 1 0 2m0-4H6a1 1 0 1 1 0-2h4a1 1 0 1 1 0 2"/><circle cx="16" cy="10.5" r="2"/><path d="M16 13.356c-1.562 0-2.5.715-2.5 1.429 0 .357.938.715 2.5.715 1.466 0 2.5-.357 2.5-.715 0-.714-.98-1.429-2.5-1.429"/></svg>
+        </div>
+        <div class="bg-yellow-100 py-4 px-4 rounded-xl border flex justify-between items-center">
+            <div>
+                <p class="text-neutral-800 font-semibold text-md">Total Industry</p>
+                <p class="text-3xl font-bold">2</p>
+            </div>
+            <svg class="w-10 h-10"xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" viewBox="0 0 60.272 60.272" xml:space="preserve"><path d="m31.577 1.863 12.462 8.139v48.577H31.577zm13.438 35.012v21.449h15.258V41.749zm6.442 16.786-4.662-1.357V48.28l4.662 1.692zm0-7.037-4.662-1.358v-4.022l4.662 1.694zm5.849 8.73-4.664-1.355v-4.026l4.664 1.695zm0-7.036-4.663-1.356v-4.024l4.665 1.692v3.688zM14.75 11.527v32.208l-2.203 1.439V34.417l-1.398.578v-10.73L.974 28.757V39.21L0 39.614v18.965h30.154V1.694zM1.907 30.804l3.434-1.589v4.132l-3.434 1.526zm.255 6.697 3.433-1.591v4.135l-3.433 1.524zm3.537 14.844-3.433 1.528v-4.071l3.433-1.589zm0-6.296-3.433 1.529v-4.071l3.433-1.588zm.489-17.237 3.434-1.589v4.133l-3.434 1.525zm.255 6.696 3.433-1.589v4.133l-3.433 1.527zm3.835 14.868-3.434 1.527v-4.069l3.434-1.591zm0-6.295-3.434 1.525v-4.067l3.434-1.59zm10.999.716-4.749 2.973v-4.408l4.749-3.072zm0-7.448-4.749 2.971v-4.41l4.749-3.072zm0-7.45-4.749 2.974v-4.411l4.749-3.074zm0-7.449-4.749 2.97v-4.408l4.749-3.074zm0-7.451-4.749 2.972v-4.409l4.749-3.073zm7.036 25.396-5.51 3.448V39.3l5.51-3.566zm0-7.45-5.51 3.449V31.85l5.51-3.568zm0-7.45-5.51 3.449v-4.542l5.51-3.569zm0-7.45-5.51 3.449v-4.543l5.51-3.568zm0-7.451-5.51 3.449V9.5l5.51-3.568z"/></svg>
+        </div>
+        <div class="bg-green-100 py-4 px-4 rounded-xl border flex justify-between items-center">
+            <div>
+                <p class="text-neutral-800 font-semibold text-md">Total Location</p>
+                <p class="text-3xl font-bold">2</p>
+            </div>
+            <svg class="w-10 h-10" viewBox="0 0 24 24" version="1.2" baseProfile="tiny" xmlns="http://www.w3.org/2000/svg"><path d="M17.657 5.304c-3.124-3.073-8.189-3.073-11.313 0a7.78 7.78 0 0 0 0 11.13L12 21.999l5.657-5.565a7.78 7.78 0 0 0 0-11.13M12 13.499c-.668 0-1.295-.26-1.768-.732a2.503 2.503 0 0 1 0-3.536c.472-.472 1.1-.732 1.768-.732s1.296.26 1.768.732a2.503 2.503 0 0 1 0 3.536c-.472.472-1.1.732-1.768.732"/></svg>
+        </div>
+    </div>
+
+
+    <!-- Activity Details -->
+    <div class="bg-white p-4 rounded-xl shadow">
+        <h1 class="font-semibold text-2xl mb-4">Activity Details</h1>
+        <table class="w-full text-left border-t border-gray-200">
+        <thead>
+            <tr class="text-gray-500 text-sm">
+            <th class="py-2">Date</th>
+            <th class="py-2">Title</th>
+            <th class="py-2">Category</th>
+            <th class="py-2">Location</th>
+            <th class="py-2">Customer</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr class="border-t hover:bg-gray-50">
+            <td class="py-2">Aug 13, 2025</td>
+            <td>Example</td>
+            <td><span class="bg-blue-100 text-blue-600 px-2 py-1 rounded-lg text-xs">client visit</span></td>
+            <td>Virtual</td>
+            <td>No customer</td>
+            </tr>
+            <tr class="border-t hover:bg-gray-50">
+            <td class="py-2">Aug 2, 2025</td>
+            <td>Sample title</td>
+            <td><span class="bg-blue-100 text-blue-600 px-2 py-1 rounded-lg text-xs">meetings attended</span></td>
+            <td>Onsite</td>
+            <td>No customer</td>
+            </tr>
+        </tbody>
+        </table>
+    </div>
+    
+    </div>
+    
+    <div id="footer"></div>
+    <script src="/JS/DRY.js"></script>
+    <script src="/JS/modal.js"></script>
+    
+  </main>
+<div id="footer"></div>
+<script src="/JS/DRY.js"></script>
+</body>
+</html>
