@@ -13,7 +13,7 @@ export default function Navbar(){
     ];
 
     return(
-        <nav className="bg-[#003D69] text-white px-4 py-4 shadow-sm shadow-gray-300 flex justify-between items-center">
+        <nav className="bg-sky-950 text-white px-4 py-4 shadow-sm shadow-gray-300 flex justify-between items-center">
             <Link to="/">
                 <div>
                     <h1 className="text-2xl font-bold leading-tight">SolArch</h1>
@@ -24,7 +24,7 @@ export default function Navbar(){
             <div className="flex items-center space-x-6 text-md leading-tight">
                 {links.map(link => (
                     <Link key={link.name} to={link.path} className={`${
-                        location.pathname === link.path ? "bg-orange-200 font-semibold text-orange-900 p-2 rounded"
+                        location.pathname === link.path ? "text-lg font-semibold text-orange-200 p-2"
                         : "text-neutral-100 hover:underline"
                     }`}>
                         {link.name}
