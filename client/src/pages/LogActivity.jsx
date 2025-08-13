@@ -4,9 +4,13 @@ import {Title, Subtitle} from "../components/Text";
 import SelectField from "../components/Dropdown";
 import TextArea from "../components/TextArea";
 import TextInput from "../components/TextInput";
+import ModalCustomer from "../components/modals/ModalCustomer";
+
 
 export default function LogActivity() {
   const [category, setCategory] = useState("");
+  const [customer, setCustomer] = useState("");
+  const [showModalCustomer, setShowModalCustomer] = useState(false);
 
   return (
     <>
@@ -64,19 +68,20 @@ export default function LogActivity() {
               />
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <SelectField classfield="flex gap-2 mt-1" label="Customer"
+              <SelectField classfield="flex gap-2 mt-1" label="Customer" name="customer" value={customer} onChange={(e) => setCustomer(e.target.value)}
                 options={[
                   {value: "", label: "Select Customer"},
                 ]}
                 >
-                <button type="button" class="bg-white border border-neutral-300 hover:bg-gray-800 hover:text-white px-3 rounded"><svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" /></svg></button>
+                <button type="button" onClick={() => setShowModalCustomer(true)} className="bg-white border border-neutral-300 hover:bg-gray-800 hover:text-white px-3 rounded"><svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4v16m8-8H4" /></svg></button>
               </SelectField>
+               <ModalCustomer isOpen={showModalCustomer} onClose={() => setShowModalCustomer(false)} />
               <SelectField classfield="flex gap-2 mt-1" label="Account Manager"
                 options={[
                   {value: "", label: "Select Account Manager"},
                 ]}
                 >
-                <button type="button" class="bg-white border border-neutral-300 hover:bg-gray-800 hover:text-white px-3 rounded"><svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" /></svg></button>
+                <button type="button" className="bg-white border border-neutral-300 hover:bg-gray-800 hover:text-white px-3 rounded"> <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4v16m8-8H4" /></svg></button>
               </SelectField>
             </div>
 
