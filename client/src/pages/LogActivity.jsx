@@ -5,12 +5,14 @@ import SelectField from "../components/Dropdown";
 import TextArea from "../components/TextArea";
 import TextInput from "../components/TextInput";
 import ModalCustomer from "../components/modals/ModalCustomer";
-
+import ModalAccountManager from "../components/modals/ModalAccountManager";
 
 export default function LogActivity() {
   const [category, setCategory] = useState("");
   const [customer, setCustomer] = useState("");
   const [showModalCustomer, setShowModalCustomer] = useState(false);
+  const [accountManager, setAccountManager] = useState("");
+  const [showModalAccountManager, setShowModalAccountManager] = useState(false);
 
   return (
     <>
@@ -75,14 +77,15 @@ export default function LogActivity() {
                 >
                 <button type="button" onClick={() => setShowModalCustomer(true)} className="bg-white border border-neutral-300 hover:bg-gray-800 hover:text-white px-3 rounded"><svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4v16m8-8H4" /></svg></button>
               </SelectField>
-               <ModalCustomer isOpen={showModalCustomer} onClose={() => setShowModalCustomer(false)} />
-              <SelectField classfield="flex gap-2 mt-1" label="Account Manager"
+              <ModalCustomer isOpen={showModalCustomer} onClose={() => setShowModalCustomer(false)} />
+              <SelectField classfield="flex gap-2 mt-1" label="Account Manager" name="accountManager" value={accountManager} onChange={(e) => setAccountManager(e.target.value)}
                 options={[
                   {value: "", label: "Select Account Manager"},
                 ]}
                 >
-                <button type="button" className="bg-white border border-neutral-300 hover:bg-gray-800 hover:text-white px-3 rounded"> <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4v16m8-8H4" /></svg></button>
+                <button type="button" onClick={() => setShowModalAccountManager(true)} className="bg-white border border-neutral-300 hover:bg-gray-800 hover:text-white px-3 rounded"> <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4v16m8-8H4" /></svg></button>
               </SelectField>
+              <ModalAccountManager isOpen={showModalAccountManager} onClose={() => setShowModalAccountManager(false)} />
             </div>
 
             {/* Conditionals parts related to the category selector/dropdown */}
