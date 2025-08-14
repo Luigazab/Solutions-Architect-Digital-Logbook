@@ -13,7 +13,7 @@ export default function Navbar(){
         { name: "Schedule", path: "/schedule" },
         { name: "Reports", path: "/reports" },
         { name: "Certification", path: "/certifications" },
-        { name: "Customer Information", path: "/customers" },
+        { name: "Customer Information", path: "/customer" },
     ];
 
     const handleSignOut = async () => {
@@ -43,7 +43,7 @@ export default function Navbar(){
                 {links.map(link => (
                     <Link key={link.name} to={link.path} className={`${
                         location.pathname === link.path ? "text-lg font-semibold text-orange-200 p-2"
-                        : "text-neutral-100 hover:underline"
+                        : "text-slate-500 hover:text-sky-50 hover:font-medium"
                     }`}>
                         {link.name}
                     </Link>
