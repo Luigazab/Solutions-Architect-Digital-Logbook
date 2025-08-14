@@ -1,7 +1,11 @@
-import { Link, useLocation } from "react-router-dom"
+import { Link, useLocation, useNavigate } from "react-router-dom"
+import { supabase } from "../supabaseClient";
+import { useEffect, useState } from "react";
 
 export default function Navbar(){
     const location = useLocation();
+    const navigate = useNavigate();
+    const [userEmail, setUserEmail] = useState("");
 
     const links =[
         { name: "Home", path: "/" },
@@ -11,6 +15,20 @@ export default function Navbar(){
         { name: "Certification", path: "/certifications" },
         { name: "Customer Information", path: "/customers" },
     ];
+
+    const handleSignOut = async () => {
+        const { error } = await supabase.auth.signOut();
+        if (error) {
+            console.error("Error signing out:", error.message);
+        } else {
+            navigate("/auth"); // Redirect to login after signing out
+        }
+    }
+    useEffect(() => {
+        supabase.auth.getUser().then(({ data }) => {
+            setUserEmail(data?.user?.email || "");
+        });
+    }, []);
 
     return(
         <nav className="bg-sky-950 text-white px-4 py-4 shadow-sm shadow-gray-300 flex justify-between items-center">
@@ -32,10 +50,10 @@ export default function Navbar(){
                 ))}
             </div>
             <div className="flex items-center gap-4">
-                <span className="text-sm">Sampleemail@gmail.com</span>
-                <Link to="/auth" className="bg-gray-100 text-sm font-medium text-gray-800 border border-gray-300 px-4 py-2 rounded hover:bg-slate-300">
+                <span className="text-sm">{userEmail}</span>
+                <button onClick={handleSignOut} className="bg-gray-100 text-sm font-medium text-gray-800 border border-gray-300 px-4 py-2 rounded hover:bg-slate-300">
                     Sign Out
-                </Link>
+                </button>
             </div>
         </nav>
     );
