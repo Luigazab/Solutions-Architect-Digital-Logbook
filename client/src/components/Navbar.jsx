@@ -54,6 +54,15 @@ export default function Navbar(){
                 <button onClick={handleSignOut} className="bg-gray-100 text-sm font-medium text-gray-800 border border-gray-300 px-4 py-2 rounded hover:bg-slate-300">
                     Sign Out
                 </button>
+                {/* <button
+                className="bg-primary text-primary-content px-4 py-2 rounded-lg"
+                onClick={() => {
+                    const html = document.documentElement;
+                    html.setAttribute('data-theme', html.getAttribute('data-theme') === 'light' ? 'dark' : 'light');
+                }}
+                >
+                Toggle Theme
+                </button> */}
             </div>
         </nav>
     );
