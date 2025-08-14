@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {Title, Subtitle} from "../components/Text";
 import SelectField from "../components/Dropdown";
 import TextArea from "../components/TextArea";
@@ -7,13 +7,55 @@ import TextInput from "../components/TextInput";
 import ModalCustomer from "../components/modals/ModalCustomer";
 import ModalAccountManager from "../components/modals/ModalAccountManager";
 import { insertActivity } from "../api/activity";
+import { supabase } from "../supabaseClient";
 
 export default function LogActivity() {
   const [category, setCategory] = useState(""); // state for activity category
   const [customer, setCustomer] = useState(""); // state for customer selection
+  const [customers, setCustomers] = useState(""); 
   const [showModalCustomer, setShowModalCustomer] = useState(false);// state for customer modal visibility
-  const [accountManager, setAccountManager] = useState("");// state for account manager selection
+  const [accountManager, setAccountManager] = useState();// state for account manager selection
+  const [accountManagers, setAccountManagers] = useState();
   const [showModalAccountManager, setShowModalAccountManager] = useState(false);// state for account manager modal visibility
+
+  useEffect(() => {
+    // Fetch account managers from the database
+    const fetchAccountManagers = async () => {
+      const { data, error } = await supabase
+        .from("account_managers")
+        .select("id, name");
+      if (!error) setAccountManagers(data || []);
+    };
+    fetchAccountManagers();
+    const fetchCustomers = async () => {
+      const { data, error } = await supabase
+        .from("customers")
+        .select("id, company_name");
+      if (!error) setCustomers(data || []);
+    };
+    fetchCustomers();
+  }, []);
+
+  const handleAccountManagerModalClose = () => {
+    setShowModalAccountManager(false); 
+    // Re-fetch account managers
+    supabase
+      .from("account_managers")
+      .select("id, name")
+      .then(({ data, error }) => {
+        if (!error) setAccountManagers(data || []);
+      });
+  }
+  const handleCustomerModalClose = () => {
+    setShowModalCustomer(false); 
+    // Re-fetch customer
+    supabase
+      .from("customers")
+      .select("id, company_name")
+      .then(({ data, error }) => {
+        if (!error) setCustomers(data || []);
+      });
+  }
 
   const [form, setForm] = useState({
     category: "",
@@ -41,11 +83,31 @@ export default function LogActivity() {
   }
   async function handleSubmit(e) {
     e.preventDefault();
-    const {error} = await insertActivity(form);
+    const payload = {//Im sorry if this code is too messy, I just avoiding to change the structure of the form
+      category: form.category,
+      solarch: form.solarch,
+      title: form.title,
+      description: form.description,
+      date: form.date,
+      start_time: form.startTime,
+      end_time: form.endTime,
+      mode: form.mode,
+      participants: form.participants,
+      customer: form.customer,
+      account_manager: form.accountManager,
+      meeting_participants: form.meetingParticipants,
+      technologies_used: form.technologiesDiscussed,
+      outcomes: form.outcomes,
+      action_items: form.actionItems,
+      knowledge_area: form.knowledgeArea,
+      training_provider: form.trainingProvider,
+      certifications_earned: form.certificationsEarned,
+    };
+    const { error } = await insertActivity(payload);
     if (error) {
       alert("Error saving activity: " + error.message);
     }
-    else {
+    else {//save activity successfully and clears the form
       alert("Activity saved successfully!");
       setForm({
         category: "",
@@ -92,12 +154,12 @@ export default function LogActivity() {
                 }}
                 options={[
                   {value: "", label: "Select Category"},
-                  {value: "clientVisit", label: "Client Visit"},
-                  {value: "meetingsAttended", label: "Meetings Attended"},
+                  {value: "client_visit", label: "Client Visit"},
+                  {value: "meetings_attended", label: "Meetings Attended"},
                   {value: "enablement", label: "Enablement"},
-                  {value: "attendedEvent", label: "Attended Event"},
-                  {value: "technicalTraining", label: "Technical Training"},
-                  {value: "knowledgeTransfer", label: "Knowledge Transfer"},
+                  {value: "attended_event", label: "Attended Event"},
+                  {value: "technical_training", label: "Technical Training"},
+                  {value: "knowledge_transfer", label: "Knowledge Transfer"},
                 ]}
               />
               <SelectField label="Solutions Architect" name="solarch" value={form.solarch} onChange={handleChange}
@@ -118,13 +180,13 @@ export default function LogActivity() {
               <TextInput label="End Time" name="endTime" value={form.endTime} onChange={handleChange} type="time" />
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <SelectField label="Mode" value={form.mode} onChange={handleChange} name="mode"
+              <SelectField label="Mode" value={form.mode} onChange={handleChange} name="mode" selectmessage="Select Virtual or Onsite"
                 options={[
                   {value: "virtual", label: "Virtual"},
                   {value: "onsite", label: "Onsite"},
                 ]}
               />
-              <SelectField label="Participants" value={form.participants} onChange={handleChange} name="participants"
+              <SelectField label="Participants" value={form.participants} onChange={handleChange} name="participants" selectmessage={"Select Internal or External"}
                 options={[
                   {value: "internal", label: "Internal"},
                   {value: "external", label: "External"},
@@ -132,17 +194,17 @@ export default function LogActivity() {
               />
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <SelectField classfield="flex gap-2 mt-1" label="Customer" name="customer" value={form.customer} onChange={(e) => {setCustomer(e.target.value); handleChange(e)}}
+              <SelectField classfield="flex gap-2 mt-1" selectmessage="Select Customer" label="Customer" name="customer" value={form.customer} onChange={(e) => {setCustomer(e.target.value); handleChange(e)}}
                 options={[
-                  {value: "", label: "Select Customer"},
+                  ...(customers || []).map(customer => ({ value: customer.id, label: customer.company_name })),
                 ]}
                 >
                 <button type="button" onClick={() => setShowModalCustomer(true)} className="bg-white border border-neutral-300 hover:bg-gray-800 hover:text-white px-3 rounded"><svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4v16m8-8H4" /></svg></button>
               </SelectField>
               
-              <SelectField classfield="flex gap-2 mt-1" label="Account Manager" name="accountManager" value={form.accountManager} onChange={(e) => {setAccountManager(e.target.value); handleChange(e)}}
+              <SelectField classfield="flex gap-2 mt-1" selectmessage="Select Account Manager" label="Account Manager" name="accountManager" value={form.accountManager} onChange={(e) => {setAccountManager(e.target.value); handleChange(e)}}
                 options={[
-                  {value: "", label: "Select Account Manager"},
+                  ...(accountManagers || []).map(manager => ({ value: manager.id, label: manager.name })),
                 ]}
                 >
                 <button type="button" onClick={() => setShowModalAccountManager(true)} className="bg-white border border-neutral-300 hover:bg-gray-800 hover:text-white px-3 rounded"> <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4v16m8-8H4" /></svg></button>
@@ -181,8 +243,8 @@ export default function LogActivity() {
               <a href="/" className="border border-gray-300 px-6 py-2 rounded-md text-gray-700 hover:bg-gray-100">Cancel</a>
             </div>
           </form>
-          <ModalCustomer isOpen={showModalCustomer} onClose={() => setShowModalCustomer(false)} />
-            <ModalAccountManager isOpen={showModalAccountManager} onClose={() => setShowModalAccountManager(false)} />
+          <ModalCustomer isOpen={showModalCustomer} onClose={ handleCustomerModalClose } />
+            <ModalAccountManager isOpen={showModalAccountManager} onClose={ handleAccountManagerModalClose} />
         </div>
       </div>
     </>
