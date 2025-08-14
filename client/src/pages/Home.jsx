@@ -12,10 +12,10 @@ export default function Home() {
         <SummaryCard title="Training Hours" value={10} subtitle="This quarter" />
       </div>
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <div className="bg-white p-6 rounded-xl border">
+        <div className="bg-white p-6 rounded-xl shadow">
           <QuickActions />
         </div>
-        <div className="bg-white p-6 rounded-xl border">
+        <div className="bg-white p-6 rounded-xl shadow">
           <RecentActivities />
         </div>
       </div>

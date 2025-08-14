@@ -10,7 +10,7 @@ export default function RecentActivities(){
                 <ActivitiesContent activityName="Another Sample" solArch="Sir you" activityDate="Aug 2, 2025" activityTime="04:00:00" activityMode="Onsite" badge="Client Visit" />
             </div>
             <div className="text-center mt-4">
-                <a href="all_activities.php" className="inline-block w-full text-sm border border-gray-800 py-2 rounded-lg hover:bg-gray-800 hover:text-white">View All Activities</a>
+                <a href="all_activities.php" className="inline-block w-full text-sm border border-gray-400 py-2 rounded-lg hover:bg-gray-800 hover:text-white">View All Activities</a>
             </div>
         </>
     );
@@ -18,7 +18,7 @@ export default function RecentActivities(){
 
 export function ActivitiesContent({activityName, solArch, activityDate, activityTime, activityMode, badge}){
     return(
-        <div className="border p-4 rounded-xl">
+        <div className="border border-gray-300 hover:bg-slate-100 hover:shadow-lg p-4 rounded-xl">
             <div className="flex justify-between">
                 <div>
                     <h4 className="font-semibold">{activityName}</h4>

@@ -138,8 +138,8 @@ export default function LogActivity() {
   return (
     <>
       <div className="max-w-2xl mx-auto p-2 space-y-4">
-        <a href="/" className="text-lg font-semibold text-neutral-800 hover:underline">&larr; Back to Dashboard</a>
-        <div className="bg-white p-6 rounded-xl border shadow-md">
+        <a href="/" className="text-md text-neutral-800 hover:font-semibold">&larr; Back to Dashboard</a>
+        <div className="bg-white p-6 rounded-xl shadow-2xl">
           <Title>Log Activity</Title>
           <Subtitle>Record your daily activity</Subtitle>
           <form className="space-y-6" onSubmit={handleSubmit}>
