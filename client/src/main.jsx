@@ -11,6 +11,8 @@ import Login from './pages/Login.jsx';
 import RequireAuth from './components/RequireAuth.jsx';
 import Loader from './components/Loader.jsx';
 
+document.documentElement.setAttribute('data-theme', 'light');// Set default theme
+
 createRoot(document.getElementById('root')).render(
   <StrictMode>
     <BrowserRouter>
