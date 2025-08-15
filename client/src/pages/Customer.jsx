@@ -111,10 +111,10 @@ export default function Customer(){
 
             <div className="bg-white p-4 rounded-xl shadow">
                 <div className="flex flex-col gap-4 md:flex-row md:justify-between md:items-center mb-4">
-                    <Title>Activity Details</Title>
-                    <label className="flex items-center gap-2 h-10 w-full max-w-lg rounded-md border border-input bg-background px-3 py-2 text-base text-muted-foreground focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2 md:text-sm">
+                    <Title>Customer Information</Title>
+                    <label className="flex items-center gap-2 h-10 w-full max-w-lg rounded-md border border-input bg-background px-3 py-2 text-base text-muted-foreground focus-within:ring-teal-800 focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2 md:text-sm">
                         <svg className="w-5 h-5 text-gray-500" viewBox="0 0 15 15" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <path fill-rule="evenodd" clip-rule="evenodd" d="M10 6.5a3.5 3.5 0 1 1-7 0 3.5 3.5 0 0 1 7 0m-.691 3.516a4.5 4.5 0 1 1 .707-.707l2.838 2.837a.5.5 0 0 1-.708.708z" fill="#000"/>
+                            <path fillRule="evenodd" clipRule="evenodd" d="M10 6.5a3.5 3.5 0 1 1-7 0 3.5 3.5 0 0 1 7 0m-.691 3.516a4.5 4.5 0 1 1 .707-.707l2.838 2.837a.5.5 0 0 1-.708.708z" fill="#000"/>
                         </svg>
                         <input type="text" placeholder="Search customers..." value={searchTerm} onChange={(e) => handleSearch(e.target.value)} className="w-full bg-transparent outline-none placeholder:text-muted-foreground" />
                     </label>
