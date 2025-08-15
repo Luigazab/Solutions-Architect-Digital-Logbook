@@ -150,7 +150,7 @@ export default function LogActivity() {
                 value={form.category}
                 onChange={(e) => {
                   setCategory(e.target.value);
-                  handleChange(e);
+                  handleChange(e)
                 }}
                 options={[
                   {value: "", label: "Select Category"},
@@ -213,7 +213,7 @@ export default function LogActivity() {
             </div>
 
             {/* Conditionals parts related to the category selector/dropdown */}
-            {(category === "clientVisit" || category === "meetingsAttended") && (
+            {(category === "client_visit" || category === "meetings_attended") && (
               <div className="space-y-4">
                 <TextInput label="Meeting Participants" placeholder="Add participant name" name="meetingParticipants" value={form.meetingParticipants} onChange={handleChange} classfield="flex gap-2 mt-1">
                   <button type="button" class="bg-gray-800 text-white px-3 rounded"><svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" /></svg></button>
@@ -227,11 +227,11 @@ export default function LogActivity() {
               </div>
             )}
 
-            {(category === "enablement" || category === "knowledgeTransfer") && (
+            {(category === "enablement" || category === "knowledge_transfer") && (
               <TextInput label="Knowledge Area" name="knowledgeArea" type="text" value={form.knowledgeArea} onChange={handleChange} placeholder="Area of Knowledge shared/received" />
             )}
 
-            {category === "technicalTraining" && (
+            {category === "technical_training" && (
               <div className="space-y-4">
                 <TextInput label="Training Provider" name="trainingProvider" type="text" value={form.trainingProvider} onChange={handleChange} placeholder="e.g., Oracle, Fortinet, Peplink, Internal Team" />
                 <TextInput label="Certifications Earned" name="certificationsEarned" type="text" value={form.certificationsEarned} onChange={handleChange} placeholder="Certification Name (If applicable)" />
