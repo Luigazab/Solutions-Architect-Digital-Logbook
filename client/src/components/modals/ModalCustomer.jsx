@@ -45,11 +45,11 @@ export default function ModalCustomer({ isOpen, onClose }) {
 
   return (
     <Modal isOpen={isOpen} onClose={onClose} title="Create a new customer record">
-      <form className="space-y-4" onSubmit={handleSubmit}>
+      <form className="lg:space-y-4" onSubmit={handleSubmit}>
         <TextInput label="Company Name" placeholder="Company name" value={name} onChange={e => setName(e.target.value)} />
         <TextInput label="Industry" placeholder="e.g., Healthcare, Finance" value={industry} onChange={e => setIndustry(e.target.value)} />
         <TextInput label="Contact Person" placeholder="e.g., Enterprise, SMB" value={contactPerson} onChange={e => setContactPerson(e.target.value)} />
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div className="grid grid-cols-2 gap-2">
           <TextInput label="Contact Number" placeholder="+63 9123 456 7890" value={contactNumber} onChange={e => setContactNumber(e.target.value)} />
           <TextInput label="Contact Email" placeholder="Enter contact person's email" value={contactEmail} onChange={e => setContactEmail(e.target.value)} />
           <TextInput label="Location" placeholder="City, Region" value={location} onChange={e => setLocation(e.target.value)} />
