@@ -111,8 +111,8 @@ export default function Report(){
                     <ul className="space-y-2">
                         {breakdown.map((b) => (
                             <li key={`${b.category_name}-${b.color}`} className="flex justify-between items-center">  
-                                <span className={`inline-flex items-center rounded-md bg-${b.color}-100 px-2 py-1 text-xs font-medium text-${b.color}-700 ring-1 ring-${b.color}-300/50`}>{b.category_name}</span>
-                                <span className={`text-${b.color}-500`}>{b.count}</span>
+                                <span className={`inline-flex items-center rounded-full bg-${b.color}-50 px-2 py-1 text-xs font-medium text-${b.color}-700 ring-1 ring-${b.color}-600/20 ring-inset`}>{b.category_name}</span>
+                                <span className={`text-${b.color}-700`}>{b.count}</span>
                             </li>
                         ))}
                     </ul>
