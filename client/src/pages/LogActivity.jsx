@@ -244,7 +244,7 @@ export default function LogActivity() {
             </div>
           </form>
           <ModalCustomer isOpen={showModalCustomer} onClose={ handleCustomerModalClose } />
-            <ModalAccountManager isOpen={showModalAccountManager} onClose={ handleAccountManagerModalClose} />
+          <ModalAccountManager isOpen={showModalAccountManager} onClose={ handleAccountManagerModalClose} />
         </div>
       </div>
     </>
