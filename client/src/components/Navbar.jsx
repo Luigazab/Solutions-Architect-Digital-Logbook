@@ -11,8 +11,8 @@ export default function Navbar(){
         { name: "Home", path: "/" },
         { name: "Log Activity", path: "/log-activity" },
         { name: "Schedule", path: "/schedule" },
-        { name: "Reports", path: "/reports" },
-        { name: "Certification", path: "/certifications" },
+        { name: "Reports", path: "/report" },
+        { name: "Certification", path: "/certification" },
         { name: "Customer Information", path: "/customer" },
     ];
 
@@ -35,11 +35,11 @@ export default function Navbar(){
             <Link to="/">
                 <div>
                     <h1 className="text-2xl font-bold leading-tight">SolArch</h1>
-                    <p className="text-sm text-slate-300">Solution Architect Activity Tracker</p>
+                    <p className="hidden text-sm text-slate-300 md:block">Solution Architect Activity Tracker</p>
                 </div>
             </Link>
 
-            <div className="flex items-center space-x-6 text-md leading-tight">
+            <div className="hidden items-center space-x-6 text-md leading-tight lg:flex">
                 {links.map(link => (
                     <Link key={link.name} to={link.path} className={`${
                         location.pathname === link.path ? "text-lg font-semibold text-orange-200 p-2"

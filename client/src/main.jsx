@@ -8,6 +8,9 @@ import Home from './pages/Home';
 import LogActivity from './pages/LogActivity';
 import Customer from './pages/Customer';
 import Login from './pages/Login.jsx';
+import Report from './pages/Report.jsx';
+import Schedule from './pages/Schedule.jsx';
+import Certification from './pages/Certification.jsx';
 import RequireAuth from './components/RequireAuth.jsx';
 import Loader from './components/Loader.jsx';
 
@@ -28,6 +31,9 @@ createRoot(document.getElementById('root')).render(
           <Route index element={<Home />} /> {/* index = default content */}
           <Route path="log-activity" element={<LogActivity />} />
           <Route path="customer" element={<Customer />} />
+          <Route path="report" element={<Report />} />
+          <Route path="schedule" element={<Schedule />} />
+          <Route path="certification" element={<Certification />} />
           <Route path="loader" element={<Loader />} />
         </Route>
       </Routes>
