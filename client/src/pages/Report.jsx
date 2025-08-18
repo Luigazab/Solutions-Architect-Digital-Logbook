@@ -4,6 +4,7 @@ import SummaryCard from "../components/SummaryCard";
 import { Title, Subtitle, Description} from "../components/Text";
 import { supabase } from "../supabaseClient";
 import Loader from "../components/Loader";
+import { getCategoryBadgeClasses, getColorClasses } from '../utils/colors';
 
 const exportToCSV = (data, filename) => {
   if (!data.length) return;
@@ -40,6 +41,8 @@ export default function Report(){
     const [breakdown, setBreakdown] = useState([]);
     const [activities, setActivities] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [customerStats, setCustomerStats] = useState([]);
+    const [searchTerm, setSearchTerm] = useState("");   
 
     useEffect(() => {
         async function fetchData() {
@@ -49,6 +52,7 @@ export default function Report(){
                 .select(`*, category:categories (category_name, color), customer:customers (company_name, location)`);
             if (activitiesError) {
                 console.error("Error fetching activities:", activitiesError);
+                setLoading(false);
                 return;
             }
             const totalActivities = activitiesData.length;
@@ -63,6 +67,37 @@ export default function Report(){
                 }
                 categories[catKey].count++;
             });
+
+            const customerActivity = {};
+            activitiesData.forEach((activity) => {
+                if (activity.customer && activity.customer.company_name) {
+                const customerKey = activity.customer.company_name;
+                if (!customerActivity[customerKey]) {
+                    customerActivity[customerKey] = {
+                    company_name: activity.customer.company_name,
+                    location: activity.customer.location,
+                    count: 0,
+                    lastActivity: activity.date
+                    };
+                }
+                customerActivity[customerKey].count++;
+                // Keep track of most recent activity
+                if (new Date(activity.date) > new Date(customerActivity[customerKey].lastActivity)) {
+                    customerActivity[customerKey].lastActivity = activity.date;
+                }
+                }
+            });
+
+            // Convert to array and sort by activity count
+            const sortedCustomers = Object.values(customerActivity)
+                .sort((a, b) => b.count - a.count)
+                .map((customer, index) => ({
+                ...customer,
+                rank: index + 1,
+                color: getCustomerColor(index)
+                }));
+
+            setCustomerStats(sortedCustomers);
 
             setBreakdown(Object.entries(categories).map(([name, info]) => ({
                 category_name: name,
@@ -79,6 +114,54 @@ export default function Report(){
         }
         fetchData();
     }, []);
+     const getCustomerInitials = (companyName) => {
+    if (!companyName) return "??";
+    return companyName
+      .split(' ')
+      .map(word => word[0])
+      .join('')
+      .substring(0, 2)
+      .toUpperCase();
+  };
+
+    // Helper function to get color for customer based on rank
+    const getCustomerColor = (index) => {
+        const colors = ['blue', 'green', 'purple', 'orange', 'pink', 'teal', 'red', 'indigo'];
+        return colors[index % colors.length];
+    };
+
+    // Helper function to format last activity date
+    const formatLastActivity = (dateString) => {
+        const date = new Date(dateString);
+        const now = new Date();
+        const diffTime = Math.abs(now - date);
+        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+        
+        if (diffDays === 1) return "1 day ago";
+        if (diffDays < 7) return `${diffDays} days ago`;
+        if (diffDays < 30) return `${Math.ceil(diffDays / 7)} weeks ago`;
+        return date.toLocaleDateString();
+    };
+
+    // Filter activities based on search term
+    const filteredActivities = activities.filter(activity =>
+        activity.customer?.company_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        activity.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        activity.solarch.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+
+    const handleExportCSV = () => {
+        const exportData = filteredActivities.map(activity => ({
+        Date: new Date(activity.date).toLocaleDateString(),
+        'Solution Architect': activity.solarch,
+        Activity: activity.title,
+        Category: activity.category?.category_name,
+        Location: activity.customer?.location,
+        Customer: activity.customer?.company_name || "No customer"
+        }));
+        exportToCSV(exportData, 'activities-report.csv');
+    };
+
     return(
         <>
             <div className="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-4 gap-4 mb-6">
@@ -111,17 +194,74 @@ export default function Report(){
                     <ul className="space-y-2">
                         {breakdown.map((b) => (
                             <li key={`${b.category_name}-${b.color}`} className="flex justify-between items-center">  
-                                <span className={`inline-flex items-center rounded-full bg-${b.color}-50 px-2 py-1 text-xs font-medium text-${b.color}-700 ring-1 ring-${b.color}-600/20 ring-inset`}>{b.category_name}</span>
+                                <span className={getCategoryBadgeClasses(b.color)}>{b.category_name}</span>
                                 <span className={`text-${b.color}-700`}>{b.count}</span>
                             </li>
                         ))}
                     </ul>
                 </div>
-                <div className="bg-white p-4 sm:col-span-3 md:col-span-2 rounded-xl shadow flex flex-col items-center justify-center text-gray-400">
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-10 w-10 mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5.121 17.804A9.958 9.958 0 0112 15c2.21 0 4.244.72 5.879 1.93M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                    </svg>
-                    <p>No customer activities in selected period</p>
+                
+                <div className="bg-white p-4 sm:col-span-3 md:col-span-2 rounded-xl shadow">
+                    <div className="flex justify-between items-center mb-4">
+                        <div>
+                            <Title>Top Customers</Title>
+                            <Description>Most active clients this period</Description>
+                        </div>
+                        <svg className="w-10 h-10" viewBox="0 0 512 512" xmlSpace="preserve" xmlns="http://www.w3.org/2000/svg" fill="currentColor"><path d="M430.641 347.807h15.417a3.753 3.753 0 0 0 3.752-3.752v-23.08a3.75 3.75 0 0 0-3.752-3.751H65.942a3.75 3.75 0 0 0-3.752 3.751v23.08a3.753 3.753 0 0 0 3.752 3.752h15.416V468.12H430.64V347.807zM256 276.611v18.354c0 5.799 4.701 10.499 10.5 10.499h155.344c5.798 0 10.499-4.7 10.499-10.499v-18.354h-27.159v4.559a8.49 8.49 0 0 1-8.49 8.49h-8.135a8.49 8.49 0 0 1-8.49-8.49v-4.559h-71.794v4.559a8.49 8.49 0 0 1-8.49 8.49h-8.134a8.49 8.49 0 0 1-8.49-8.49v-4.559zm176.343-30.298c0-5.799-4.701-10.5-10.499-10.5H266.5c-5.799 0-10.5 4.701-10.5 10.5v17.399h176.343zm-86.361-28.029c.975 1.95 3.756 1.95 4.73 0l13.118-26.235c33.93-7.134 59.407-37.227 59.407-73.278 0-43.146-36.488-77.771-80.29-74.7-37.472 2.627-67.539 33.376-69.396 70.893-1.868 37.724 24.195 69.702 59.313 77.085zm-28.961-105.217 18.185 18.185 44.468-44.468 12.268 12.27-56.735 56.735-30.453-30.452zM62.19 186.001v89.035a8.1 8.1 0 0 0 8.1 8.1h54.168v22.329h31.394v-22.329h54.169a8.1 8.1 0 0 0 8.1-8.1v-89.035a8.1 8.1 0 0 0-8.1-8.099H70.29a8.1 8.1 0 0 0-8.1 8.099m18.842 13.27a4.43 4.43 0 0 1 4.431-4.43h109.385a4.43 4.43 0 0 1 4.43 4.43v62.494a4.43 4.43 0 0 1-4.43 4.431H85.463a4.43 4.43 0 0 1-4.431-4.431z"/></svg>
+                    </div>
+                    
+                    {loading ? (
+                        <div className="flex justify-center py-8">
+                        <Loader />
+                        </div>
+                    ) : customerStats.length > 0 ? (
+                        <>
+                        <div className="max-h-24 overflow-y-auto pr-2 space-y-3 scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100">
+                            {customerStats.map((customer, index) => {
+                            const colors = getColorClasses(customer.color);
+                            const gradientClass = `bg-gradient-to-r from-${customer.color}-50 to-${customer.color}-100`;
+                            const borderClass = `border-${customer.color}-200`;
+                            
+                            return (
+                                <div 
+                                key={customer.company_name} 
+                                className={`flex items-center justify-between p-3 ${gradientClass} rounded-lg border ${borderClass} hover:shadow-md transition-all duration-200 cursor-pointer`}
+                                >
+                                <div className="flex items-center space-x-3">
+                                    <div className={`w-10 h-10 bg-${customer.color}-500 rounded-lg flex items-center justify-center shadow-sm`}>
+                                    <span className="text-white font-bold text-sm" >
+                                        {getCustomerInitials(customer.company_name)}
+                                    </span>
+                                    </div>
+                                    <div>
+                                    <h4 className="font-semibold text-gray-900">{customer.company_name}</h4>
+                                    <p className="text-sm text-gray-600">
+                                        {customer.location} • Last activity: {formatLastActivity(customer.lastActivity)}
+                                    </p>
+                                    </div>
+                                </div>
+                                <div className="text-right">
+                                    <div className={`text-lg font-bold ${colors.text}`}>{customer.count}</div>
+                                    <div className="text-xs text-gray-500">{customer.count === 1 ? 'activity' : 'activities'}</div>
+                                </div>
+                                </div>
+                            );
+                            })}
+                        </div>
+
+                        <div className="mt-4 pt-3 border-t border-gray-200">
+                            <div className="flex items-center justify-between text-sm">
+                                <span className="text-gray-600">Total Active Customers</span>
+                                <span className="font-semibold text-gray-900">{customerStats.length}</span>
+                            </div>
+                        </div>
+                        </>
+                    ) : (
+                        <div className="flex flex-col items-center justify-center py-8 text-gray-400">
+                            <svg xmlns="http://www.w3.org/2000/svg" className="h-10 w-10 mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 20h5v-2a3 3 0 00-5.196-2.196M17 20H7m10 0v-2a3 3 0 00-3-3m0 0a3 3 0 00-3 3v2m3-6a3 3 0 100-6 3 3 0 000 6m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                            <p>No customer activities in selected period</p>
+                        </div>
+                    )}
                 </div>
             </div>
             <div className="bg-white p-4 rounded-xl shadow">
@@ -132,17 +272,29 @@ export default function Report(){
                     </div>
                     
                     <label className="flex items-center gap-2 h-10 w-full max-w-lg rounded-md border border-input bg-background px-3 py-2 text-base text-muted-foreground focus-within:ring-teal-800 focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-1 md:text-sm">
-                        <svg className="w-5 h-5 text-gray-500" viewBox="0 0 15 15" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <path fillRule="evenodd" clipRule="evenodd" d="M10 6.5a3.5 3.5 0 1 1-7 0 3.5 3.5 0 0 1 7 0m-.691 3.516a4.5 4.5 0 1 1 .707-.707l2.838 2.837a.5.5 0 0 1-.708.708z" fill="#000"/>
-                        </svg>
-                        <input type="text" placeholder="Search customers..." className="w-full bg-transparent outline-none placeholder:text-muted-foreground" />
+                    <svg className="w-5 h-5 text-gray-500" viewBox="0 0 15 15" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path fillRule="evenodd" clipRule="evenodd" d="M10 6.5a3.5 3.5 0 1 1-7 0 3.5 3.5 0 0 1 7 0m-.691 3.516a4.5 4.5 0 1 1 .707-.707l2.838 2.837a.5.5 0 0 1-.708.708z" fill="#000"/>
+                    </svg>
+                    <input 
+                        type="text" 
+                        placeholder="Search activities..." 
+                        className="w-full bg-transparent outline-none placeholder:text-muted-foreground"
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                    />
                     </label>
                     <div className="flex justify-end md:gap-2">
                         <a href="log-activity" className="inline-flex items-center border rounded-lg p-2 bg-slate-700 font-medium text-neutral-100 hover:bg-slate-800 hover:text-neutral-200">Log Activity</a>
-                        <button className="inline-flex items-center border rounded-lg p-2 bg-emerald-700 font-medium text-neutral-100 hover:bg-teal-800 hover:text-neutral-200">Export CSV</button>
+                        <button 
+                            onClick={handleExportCSV}
+                            className="inline-flex items-center border rounded-lg p-2 bg-emerald-700 font-medium text-neutral-100 hover:bg-teal-800 hover:text-neutral-200 transition-colors"
+                        >
+                            Export CSV
+                        </button>
                     </div>
                 </div>
-                <table className="w-full text-left border-t border-gray-200 space-x-8 space-y-4">
+                <div className="overflow-x-auto w-full">
+                <table className="w-full text-left border-t min-w-full border-gray-200 space-x-8 space-y-4">
                 <thead>
                     <tr className="text-gray-500 text-sm">
                     <th className="py-2"></th>
@@ -157,33 +309,36 @@ export default function Report(){
                 <tbody>
                     {loading ? (
                         <tr>
-                            <td colSpan="7" className="text-center py-4">
-                                <Loader /> 
+                        <td colSpan="7" className="text-center py-8">
+                            <Loader /> 
+                        </td>
+                        </tr>
+                    ) : filteredActivities.length > 0 ? (
+                        filteredActivities.map((activity, index) => (
+                        <tr key={activity.id} className="border-b border-gray-100 hover:bg-gray-50 transition-colors">
+                            <td className="py-3 px-2 text-gray-500">{index + 1}</td>
+                            <td className="py-3 px-2">{new Date(activity.date).toLocaleDateString()}</td>
+                            <td className="py-3 px-2 font-medium">{activity.solarch}</td>
+                            <td className="py-3 px-2">{activity.title}</td>
+                            <td className="py-3 px-2">
+                            <span className={getCategoryBadgeClasses(activity.category?.color)}>
+                                {activity.category?.category_name}
+                            </span>
                             </td>
+                            <td className="py-3 px-2 text-gray-600">{activity.customer?.location}</td>
+                            <td className="py-3 px-2 text-gray-600">{activity.customer?.company_name || "No customer"}</td>
                         </tr>
-                    ) :
-                    activities.length > 0 ? (
-                    activities.map((activity, index) => (
-                        <tr key={activity.id} className="shadow-sm border-t border-gray-200 hover:bg-gray-100">
-                            <td className="px-4">{index+1}</td>
-                            <td className="py-2">{new Date(activity.date).toLocaleDateString()}</td>
-                            <td>{activity.solarch}</td>
-                            <td>{activity.title}</td>
-                            <td><span className={`bg-${activity.category.color}-100 text-${activity.category.color}-600 px-2 py-1 rounded-lg text-xs`}>{activity.category.category_name}</span></td>
-                            <td>{activity.customer.location}</td>
-                            <td>{activity.customer.company_name || "No customer"}</td>
-                        </tr>
-                    ))
+                        ))
                     ) : (
                         <tr>
-                            <td colSpan="7" className="text-center py-4">
-                                No activities found for the selected period.
-                            </td>
+                        <td colSpan="7" className="text-center py-8 text-gray-500">
+                            {searchTerm ? `No activities found matching "${searchTerm}"` : "No activities found for the selected period."}
+                        </td>
                         </tr>
-                    )
-                }
-                </tbody>
+                    )}
+                    </tbody>
                 </table>
+                </div>
             </div>
         </>
     );
