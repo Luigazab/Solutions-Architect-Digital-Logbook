@@ -42,7 +42,7 @@ export default function Navbar(){
             <div className="hidden items-center space-x-6 text-md leading-tight lg:flex">
                 {links.map(link => (
                     <Link key={link.name} to={link.path} className={`${
-                        location.pathname === link.path ? "text-lg font-semibold text-orange-200 p-2"
+                        location.pathname === link.path ? "text-lg font-semibold text-amber-400 p-2"
                         : "text-slate-500 hover:text-sky-50 hover:font-medium"
                     }`}>
                         {link.name}
