@@ -152,8 +152,8 @@ export default function LogActivity() {
                   setCategory(e.target.value);
                   handleChange(e)
                 }}
+                selectmessage={"Select Activity Category"}
                 options={[
-                  {value: "", label: "Select Category"},
                   {value: "client_visit", label: "Client Visit"},
                   {value: "meetings_attended", label: "Meetings Attended"},
                   {value: "enablement", label: "Enablement"},
@@ -162,9 +162,8 @@ export default function LogActivity() {
                   {value: "knowledge_transfer", label: "Knowledge Transfer"},
                 ]}
               />
-              <SelectField label="Solutions Architect" name="solarch" value={form.solarch} onChange={handleChange}
+              <SelectField label="Solutions Architect" name="solarch" value={form.solarch} onChange={handleChange} selectmessage={"Select Solutions Architect"}
                 options={[
-                  {value: "", label: "Select SolArch"},
                   {value: "reggie", label: "Reggie"},
                   {value: "klien", label: "Klien"},
                   {value: "rommel", label: "Rommel"},
