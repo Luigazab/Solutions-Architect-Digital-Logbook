@@ -146,7 +146,7 @@ function CalendarDay({ day, isToday, activities, onSelect, isCurrentMonth, isSel
         <span className={`absolute bottom-1 left-1 text-[10px] rounded px-1 ${
           isSelected 
             ? "text-indigo-700 bg-indigo-200" 
-            : "text-blue-600 bg-blue-100"
+            : "text-amber-600 bg-amber-100"
         }`}>
           {activities} activit{activities > 1 ? "ies" : "y"}
         </span>

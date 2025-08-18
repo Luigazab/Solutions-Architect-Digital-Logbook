@@ -216,28 +216,23 @@ export default function Report(){
                         </div>
                     ) : customerStats.length > 0 ? (
                         <>
-                        <div className="max-h-24 overflow-y-auto pr-2 space-y-3 scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100">
+                        <div className="max-h-64 md:max-h-24 overflow-y-auto pr-2 space-y-3 scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100">
                             {customerStats.map((customer, index) => {
                             const colors = getColorClasses(customer.color);
                             const gradientClass = `bg-gradient-to-r from-${customer.color}-50 to-${customer.color}-100`;
                             const borderClass = `border-${customer.color}-200`;
                             
                             return (
-                                <div 
-                                key={customer.company_name} 
-                                className={`flex items-center justify-between p-3 ${gradientClass} rounded-lg border ${borderClass} hover:shadow-md transition-all duration-200 cursor-pointer`}
-                                >
+                                <div key={customer.company_name} className={`flex items-center justify-between p-3 ${gradientClass} rounded-lg border ${borderClass} hover:shadow-md transition-all duration-200 cursor-pointer`}>
                                 <div className="flex items-center space-x-3">
                                     <div className={`w-10 h-10 bg-${customer.color}-500 rounded-lg flex items-center justify-center shadow-sm`}>
-                                    <span className="text-white font-bold text-sm" >
-                                        {getCustomerInitials(customer.company_name)}
-                                    </span>
+                                        <span className="text-white font-bold text-sm" >
+                                            {getCustomerInitials(customer.company_name)}
+                                        </span>
                                     </div>
                                     <div>
-                                    <h4 className="font-semibold text-gray-900">{customer.company_name}</h4>
-                                    <p className="text-sm text-gray-600">
-                                        {customer.location} • Last activity: {formatLastActivity(customer.lastActivity)}
-                                    </p>
+                                        <h4 className="font-semibold text-gray-900">{customer.company_name}</h4>
+                                        <p className="text-sm text-gray-600">{customer.location} • Last activity: {formatLastActivity(customer.lastActivity)}</p>
                                     </div>
                                 </div>
                                 <div className="text-right">
@@ -245,7 +240,7 @@ export default function Report(){
                                     <div className="text-xs text-gray-500">{customer.count === 1 ? 'activity' : 'activities'}</div>
                                 </div>
                                 </div>
-                            );
+                                );
                             })}
                         </div>
 
