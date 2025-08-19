@@ -6,7 +6,7 @@ export default function Footer(){
             </p>
             <div className="flex justify-center items-center space-x-1">
                 <a href="https://docs.google.com/document/d/17G0Ze8ezBo0jYu_6JjcHQtiLr_LbTx21z5wKCrM66Q4/edit?usp=sharing" className="inline-flex justify-center p-2 text-amber-50 rounded-lg cursor-pointer dark:text-gray-400 dark:hover:text-white hover:text-gray-900 hover:bg-gray-100 dark:hover:bg-gray-600">
-                    <svg className="w-4 h-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" xmlSpace="preserve"><path fill="none" stroke="currentColor" strokeWidth="3" strokeMiterlimit="10" d="M25 28H7V4h12l6 6z"/><path fill="none" stroke="currentColor" strokeWidth="2" strokeMiterlimit="10" d="M19 4v6h6"/><path d="M11 21h10v2H11zm0-4h10v2H11zm0-4h10v2H11z"/></svg>
+                    <svg className="w-4 h-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" xmlSpace="preserve"><path fill="none" stroke="currentColor" strokeWidth="3" strokeMiterlimit="10" d="M25 28H7V4h12l6 6z"/><path fill="none" stroke="currentColor" strokeWidth="2" strokeMiterlimit="10" d="M19 4v6h6"/><path stroke="currentColor" d="M11 21h10v2H11zm0-4h10v2H11zm0-4h10v2H11z"/></svg>
                     <span className="sr-only">Documentation</span>
                 </a>
                 <a href="https://www.linkedin.com/company/macrologic-diversified-technologies-inc-official/" className="inline-flex justify-center p-2 text-amber-50 rounded-lg cursor-pointer dark:text-gray-400 dark:hover:text-white hover:text-gray-900 hover:bg-gray-100 dark:hover:bg-gray-600">

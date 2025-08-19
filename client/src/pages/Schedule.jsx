@@ -89,30 +89,21 @@ function CalendarNav({ currentMonth, onPrev, onToday, onNext, loading }) {
   return (
     <div className="flex items-center justify-between mb-4">
       <div className="flex items-center gap-2 text-lg font-medium">
-        <svg className="w-5 h-5" viewBox="0 0 15 15" fill="none" xmlns="http://www.w3.org/2000/svg"><path fillRule="evenodd" clipRule="evenodd" d="M4.5 1a.5.5 0 0 1 .5.5V2h5v-.5a.5.5 0 0 1 1 0V2h1.5A1.5 1.5 0 0 1 14 3.5v9a1.5 1.5 0 0 1-1.5 1.5h-10A1.5 1.5 0 0 1 1 12.5v-9A1.5 1.5 0 0 1 2.5 2H4v-.5a.5.5 0 0 1 .5-.5M10 3v.5a.5.5 0 0 0 1 0V3h1.5a.5.5 0 0 1 .5.5V5H2V3.5a.5.5 0 0 1 .5-.5H4v.5a.5.5 0 0 0 1 0V3zM2 6v6.5a.5.5 0 0 0 .5.5h10a.5.5 0 0 0 .5-.5V6zm5 1.5a.5.5 0 1 1 1 0 .5.5 0 0 1-1 0M9.5 7a.5.5 0 1 0 0 1 .5.5 0 0 0 0-1m1.5.5a.5.5 0 1 1 1 0 .5.5 0 0 1-1 0m.5 1.5a.5.5 0 1 0 0 1 .5.5 0 0 0 0-1M9 9.5a.5.5 0 1 1 1 0 .5.5 0 0 1-1 0M7.5 9a.5.5 0 1 0 0 1 .5.5 0 0 0 0-1M5 9.5a.5.5 0 1 1 1 0 .5.5 0 0 1-1 0M3.5 9a.5.5 0 1 0 0 1 .5.5 0 0 0 0-1M3 11.5a.5.5 0 1 1 1 0 .5.5 0 0 1-1 0m2.5-.5a.5.5 0 1 0 0 1 .5.5 0 0 0 0-1m1.5.5a.5.5 0 1 1 1 0 .5.5 0 0 1-1 0m2.5-.5a.5.5 0 1 0 0 1 .5.5 0 0 0 0-1" fill="#000"/></svg>
+        <svg className="w-5 h-5" viewBox="0 0 15 15" fill="none" xmlns="http://www.w3.org/2000/svg"><path fillRule="evenodd" clipRule="evenodd" d="M4.5 1a.5.5 0 0 1 .5.5V2h5v-.5a.5.5 0 0 1 1 0V2h1.5A1.5 1.5 0 0 1 14 3.5v9a1.5 1.5 0 0 1-1.5 1.5h-10A1.5 1.5 0 0 1 1 12.5v-9A1.5 1.5 0 0 1 2.5 2H4v-.5a.5.5 0 0 1 .5-.5M10 3v.5a.5.5 0 0 0 1 0V3h1.5a.5.5 0 0 1 .5.5V5H2V3.5a.5.5 0 0 1 .5-.5H4v.5a.5.5 0 0 0 1 0V3zM2 6v6.5a.5.5 0 0 0 .5.5h10a.5.5 0 0 0 .5-.5V6zm5 1.5a.5.5 0 1 1 1 0 .5.5 0 0 1-1 0M9.5 7a.5.5 0 1 0 0 1 .5.5 0 0 0 0-1m1.5.5a.5.5 0 1 1 1 0 .5.5 0 0 1-1 0m.5 1.5a.5.5 0 1 0 0 1 .5.5 0 0 0 0-1M9 9.5a.5.5 0 1 1 1 0 .5.5 0 0 1-1 0M7.5 9a.5.5 0 1 0 0 1 .5.5 0 0 0 0-1M5 9.5a.5.5 0 1 1 1 0 .5.5 0 0 1-1 0M3.5 9a.5.5 0 1 0 0 1 .5.5 0 0 0 0-1M3 11.5a.5.5 0 1 1 1 0 .5.5 0 0 1-1 0m2.5-.5a.5.5 0 1 0 0 1 .5.5 0 0 0 0-1m1.5.5a.5.5 0 1 1 1 0 .5.5 0 0 1-1 0m2.5-.5a.5.5 0 1 0 0 1 .5.5 0 0 0 0-1" fill="currentColor"/></svg>
         {currentMonth}
         {loading && <LoadingSpinner size="sm" />}
       </div>
-      <div className="space-x-2">
-        <button 
-          onClick={onPrev} 
-          disabled={loading}
-          className="px-3 py-1 border rounded text-sm hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-        >
+      <div className="flex items-center gap-2 justify-between">
+        <button onClick={onPrev} disabled={loading}
+          className="px-3 py-1 border rounded text-sm hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
           Previous
         </button>
-        <button 
-          onClick={onToday} 
-          disabled={loading}
-          className="px-3 py-1 border rounded text-sm hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-        >
+        <button onClick={onToday} disabled={loading}
+          className="px-3 py-1 border rounded text-sm hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
           Today
         </button>
-        <button 
-          onClick={onNext} 
-          disabled={loading}
-          className="px-3 py-1 border rounded text-sm hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-        >
+        <button onClick={onNext} disabled={loading}
+          className="px-3 py-1 border rounded text-sm hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
           Next
         </button>
       </div>
@@ -216,10 +207,8 @@ function RightPanel({ activities, selectedDate, loading, error, onRetry }) {
   return (
     <div className="bg-white border rounded-lg p-6 text-gray-700">
       {!selectedDate ? (
-        <div className="flex flex-col items-center text-center text-gray-500">
-          <svg xmlns="http://www.w3.org/2000/svg" className="h-10 w-10 mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 7V3m8 4V3m-9 4h10M5 11h14M5 17h14M5 21h14" />
-          </svg>
+        <div className="flex flex-col items-center text-center justify-center text-gray-500">
+          <svg className="w-10 h-10 m-2" viewBox="0 0 15 15" fill="none" xmlns="http://www.w3.org/2000/svg"><path fillRule="evenodd" clipRule="evenodd" d="M4.5 1a.5.5 0 0 1 .5.5V2h5v-.5a.5.5 0 0 1 1 0V2h1.5A1.5 1.5 0 0 1 14 3.5v9a1.5 1.5 0 0 1-1.5 1.5h-10A1.5 1.5 0 0 1 1 12.5v-9A1.5 1.5 0 0 1 2.5 2H4v-.5a.5.5 0 0 1 .5-.5M10 3v.5a.5.5 0 0 0 1 0V3h1.5a.5.5 0 0 1 .5.5V5H2V3.5a.5.5 0 0 1 .5-.5H4v.5a.5.5 0 0 0 1 0V3zM2 6v6.5a.5.5 0 0 0 .5.5h10a.5.5 0 0 0 .5-.5V6zm5 1.5a.5.5 0 1 1 1 0 .5.5 0 0 1-1 0M9.5 7a.5.5 0 1 0 0 1 .5.5 0 0 0 0-1m1.5.5a.5.5 0 1 1 1 0 .5.5 0 0 1-1 0m.5 1.5a.5.5 0 1 0 0 1 .5.5 0 0 0 0-1M9 9.5a.5.5 0 1 1 1 0 .5.5 0 0 1-1 0M7.5 9a.5.5 0 1 0 0 1 .5.5 0 0 0 0-1M5 9.5a.5.5 0 1 1 1 0 .5.5 0 0 1-1 0M3.5 9a.5.5 0 1 0 0 1 .5.5 0 0 0 0-1M3 11.5a.5.5 0 1 1 1 0 .5.5 0 0 1-1 0m2.5-.5a.5.5 0 1 0 0 1 .5.5 0 0 0 0-1m1.5.5a.5.5 0 1 1 1 0 .5.5 0 0 1-1 0m2.5-.5a.5.5 0 1 0 0 1 .5.5 0 0 0 0-1" fill="currentColor"/></svg>
           <h2 className="text-lg font-semibold text-black">Select a date</h2>
           <p>Click on a date to view activities</p>
         </div>
@@ -245,6 +234,7 @@ function RightPanel({ activities, selectedDate, loading, error, onRetry }) {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
               <p className="text-gray-500">No activities scheduled</p>
+              <a href="log-activity" className="inline-flex items-center border rounded-lg p-2 bg-slate-700 font-medium text-neutral-100 hover:bg-slate-800 hover:text-neutral-200">Log Activity</a>
             </div>
           ) : (
             <ul className="space-y-3">

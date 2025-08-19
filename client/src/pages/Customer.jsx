@@ -123,7 +123,8 @@ export default function Customer(){
                         <button onClick={() => exportToCSV(filteredCustomers, "customers.csv")} className="inline-flex items-center border rounded-lg p-2 bg-emerald-700 font-medium text-neutral-100 hover:bg-teal-800 hover:text-neutral-200">Export CSV</button>
                     </div>
                 </div>
-                <table class="w-full text-left space-y-4">
+                <div className="overflow-x-auto w-full">
+                <table class="w-full min-w-full text-left border-t border-gray-200 space-x-8 space-y-4">
                     <thead>
                         <tr class="text-gray-500 text-sm">
                         <th class="py-2">Date Added</th>
@@ -145,15 +146,15 @@ export default function Customer(){
                             </tr>
                         ) : filteredCustomers.length > 0 ? (
                             filteredCustomers.map((customer) => (
-                                <tr key={customer.id} className="border-b hover:bg-gray-50">
-                                    <td className="py-2">{new Date(customer.created_at).toLocaleDateString()}</td>
-                                    <td className="py-2">{customer.company_name}</td>
-                                    <td className="py-2">{customer.industry}</td>
-                                    <td className="py-2">{customer.location}</td>
-                                    <td className="py-2">{customer.contact_person}</td>
-                                    <td className="py-2">{customer.email}</td>
-                                    <td className="py-2">{customer.contact_number}</td>
-                                    <td className="py-2"></td>
+                                <tr key={customer.id} className="border-b border-gray-100 hover:bg-blue-50 transition-colors">
+                                    <td className="py-3 px-2">{new Date(customer.created_at).toLocaleDateString()}</td>
+                                    <td className="py-3 px-2">{customer.company_name}</td>
+                                    <td className="py-3 px-2">{customer.industry}</td>
+                                    <td className="py-3 px-2">{customer.location}</td>
+                                    <td className="py-3 px-2">{customer.contact_person}</td>
+                                    <td className="py-3 px-2">{customer.email}</td>
+                                    <td className="py-3 px-2">{customer.contact_number}</td>
+                                    <td className="py-3 px-2"></td>
                                 </tr>
                             ))
                         ) : (
@@ -163,6 +164,7 @@ export default function Customer(){
                         )}
                     </tbody>
                     </table>
+                </div>
                     <ModalCustomer isOpen={showModalCustomer} onClose={ handleCustomerModalClose } />
             </div>
 

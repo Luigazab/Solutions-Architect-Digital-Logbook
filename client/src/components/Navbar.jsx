@@ -109,7 +109,7 @@ export default function Navbar(){
 
     return(
         <>
-            <nav className="bg-sky-950 text-white px-4 py-4 shadow-sm shadow-gray-300 flex justify-between items-center relative z-50">
+            <nav className="bg-sky-950 text-white px-4 py-4 shadow shadow-sky-200 flex justify-between items-center relative z-50">
                 <Link to="/">
                     <div>
                         <h1 className="text-2xl font-bold leading-tight">SolArch</h1>
@@ -196,7 +196,7 @@ export default function Navbar(){
             {/* Mobile Sidebar Overlay */}
             {isAuthenticated && (isMobileMenuOpen || isUserDropdownOpen) && (
                 <div 
-                    className="fixed inset-0 bg-black bg-opacity-50 z-40 lg:hidden" 
+                    className="fixed inset-0 bg-black/50 z-40 lg:hidden" 
                     onClick={() => {
                         closeMobileMenu();
                         closeUserDropdown();

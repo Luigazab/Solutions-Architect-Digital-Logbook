@@ -304,13 +304,13 @@ export default function Report(){
                 <tbody>
                     {loading ? (
                         <tr>
-                        <td colSpan="7" className="text-center py-8">
-                            <Loader /> 
-                        </td>
+                            <td colSpan="7" className="text-center py-8">
+                                <Loader /> 
+                            </td>
                         </tr>
                     ) : filteredActivities.length > 0 ? (
                         filteredActivities.map((activity, index) => (
-                        <tr key={activity.id} className="border-b border-gray-100 hover:bg-gray-50 transition-colors">
+                        <tr key={activity.id} className="border-b border-gray-100 hover:bg-blue-50 transition-colors">
                             <td className="py-3 px-2 text-gray-500">{index + 1}</td>
                             <td className="py-3 px-2">{new Date(activity.date).toLocaleDateString()}</td>
                             <td className="py-3 px-2 font-medium">{activity.solarch}</td>

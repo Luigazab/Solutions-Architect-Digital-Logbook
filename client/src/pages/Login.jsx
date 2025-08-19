@@ -35,8 +35,8 @@ export default function Login() {
     }
 
     return (
-        <div className="flex items-center justify-center bg-gray-100">
-        <div className="bg-white p-8 rounded-lg shadow-md w-full max-w-md">
+        <div className="flex items-center justify-center">
+        <div className="bg-white p-8 rounded-lg inline-shadow shadow-2xl w-full max-w-md">
             <div className="mb-6 text-center">
                 <h2 className="text-2xl font-bold">Login</h2>
                 <p>Welcome back! Please enter your details to login to the system.</p>
@@ -45,7 +45,7 @@ export default function Login() {
                 <TextInput label="Email" type="email" placeholder="Enter your email" value={email} onChange={e => setEmail(e.target.value)} ></TextInput>
                 <TextInput label="Password" type="password" value={password} onChange={e => setPassword(e.target.value)} placeholder="Enter your password" ></TextInput>
                 {error && <div className="text-red-500 text-sm">{error}</div>}
-                <button type="submit" className="w-full bg-blue-600 text-white p-3 rounded-lg hover:bg-blue-700 transition duration-200">
+                <button type="submit" className="w-full bg-sky-950 text-white p-3 rounded-lg hover:bg-sky-900 hover:scale-99 transition duration-200">
                     Login
                 </button>
             </form>

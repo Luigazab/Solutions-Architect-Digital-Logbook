@@ -4,8 +4,6 @@ import { useState, useEffect } from "react";
 import Loader from "./Loader";
 import { getCategoryBadgeClasses } from "../utils/colors";
 
-
-
 export default function RecentActivities(){
     const [activities, setActivities] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -68,7 +66,7 @@ export function ActivitiesContent({activityName, solArch, activityDate, activity
                         <span>{activityMode}</span>
                     </p>
                 </div>
-                <span className={badgeColor}>{badge}</span>
+                <span><span className={badgeColor}>{badge}</span></span>
             </div>
         </div>
     );
