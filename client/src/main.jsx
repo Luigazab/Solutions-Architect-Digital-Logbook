@@ -13,6 +13,7 @@ import Schedule from './pages/Schedule.jsx';
 import Certification from './pages/Certification.jsx';
 import RequireAuth from './components/RequireAuth.jsx';
 import AddMember from './pages/AddMember.jsx';
+import Profile from './pages/Profile.jsx';
 import Loader from './components/Loader.jsx';
 
 document.documentElement.setAttribute('data-theme', 'light');// Set default theme
@@ -36,6 +37,7 @@ createRoot(document.getElementById('root')).render(
           <Route path="schedule" element={<Schedule />} />
           <Route path="certification" element={<Certification />} />
           <Route path="add-member" element={<AddMember/>} />
+          <Route path="profile" element={<Profile />} />
           <Route path="loader" element={<Loader />} />
         </Route>
       </Routes>
