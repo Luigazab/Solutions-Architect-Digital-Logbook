@@ -138,7 +138,7 @@ export default function LogActivity() {
   return (
     <>
       <div className="max-w-2xl mx-auto p-2 space-y-4">
-        <a href="/" className="text-md text-neutral-800 hover:font-semibold">&larr; Back to Dashboard</a>
+        <button onClick={() => window.history.back()} className="text-md text-neutral-800 hover:font-semibold">&larr; Back to Dashboard</button>
         <div className="bg-white p-6 rounded-xl shadow-2xl">
           <Title>Log Activity</Title>
           <Subtitle>Record your daily activity</Subtitle>
