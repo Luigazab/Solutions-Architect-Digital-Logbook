@@ -2,6 +2,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { supabase } from "../supabaseClient";
 import { getCategoryBadgeClasses } from '../utils/colors';
+import { useNavigate } from "react-router-dom";
 
 // Loading Spinner Component
 function LoadingSpinner({ size = "sm" }) {
@@ -99,7 +100,7 @@ function CalendarNav({ currentMonth, onPrev, onToday, onNext, loading }) {
           Previous
         </button>
         <button onClick={onToday} disabled={loading}
-          className="px-3 py-1 border rounded text-sm hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
+          className="px-3 py-1 border rounded text-sm text-white bg-sky-950 hover:text-amber-200 disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
           Today
         </button>
         <button onClick={onNext} disabled={loading}
@@ -116,7 +117,7 @@ function CalendarDay({ day, isToday, activities, onSelect, isCurrentMonth, isSel
   return (
     <div
       onClick={() => onSelect(day.date)}
-      className={`border rounded h-20 p-1 relative cursor-pointer transition-colors ${
+      className={`border rounded h-12 md:h-20 p-1 relative cursor-pointer transition-colors ${
         isSelected 
           ? "border-2 border-indigo-500 bg-indigo-100" 
           : isToday 
@@ -124,6 +125,7 @@ function CalendarDay({ day, isToday, activities, onSelect, isCurrentMonth, isSel
             : "hover:bg-gray-100"
       } ${!isCurrentMonth ? "text-gray-300 bg-gray-50" : ""}`}
     >
+      {/* Displays the date */}
       <div className={`text-sm ${
         isSelected 
           ? "font-bold text-indigo-700" 
@@ -133,13 +135,14 @@ function CalendarDay({ day, isToday, activities, onSelect, isCurrentMonth, isSel
       }`}>
         {day.date.getDate()}
       </div>
+      {/* Shows how many activities there are in a day, if its only 1 it displays "activity". But if its more than 1, it displays activities.  */}
       {activities > 0 && isCurrentMonth && (
-        <span className={`absolute bottom-1 left-1 text-[10px] rounded px-1 ${
+        <span className={`absolute flex bottom-1 font-bold md:font-normal text-center left-1 text-[10px] rounded px-1 ${
           isSelected 
             ? "text-indigo-700 bg-indigo-200" 
             : "text-amber-600 bg-amber-100"
         }`}>
-          {activities} activit{activities > 1 ? "ies" : "y"}
+          {activities} <span className="hidden md:block"> activit{activities > 1 ? "ies" : "y"}</span>
         </span>
       )}
     </div>
@@ -174,10 +177,10 @@ function CalendarGrid({ days, today, onSelect, selectedDate }) {
 }
 
 // Activity Item Component
-function ActivityItem({ activity }) {
+function ActivityItem({ activity, onClick }) {
   
   return (
-    <li className="border p-3 rounded-md shadow-sm hover:shadow-md transition-shadow">
+    <li className="border p-3 rounded-md shadow-sm hover:shadow-md hover:bg-blue-50 transition-shadow cursor-pointer" onClick={onClick} >
       <div className="flex justify-between items-center mb-2">
         <span className="text-sm text-gray-600">
           {activity.start_time} – {activity.end_time}
@@ -203,6 +206,12 @@ function RightPanel({ activities, selectedDate, loading, error, onRetry }) {
       </div>
     );
   }
+  const navigate = useNavigate();
+
+  const handleActivityClick = (activityId) => {
+    navigate(`/view-edit-activity?id=${activityId}`);
+  };
+
 
   return (
     <div className="bg-white border rounded-lg p-6 text-gray-700">
@@ -239,7 +248,7 @@ function RightPanel({ activities, selectedDate, loading, error, onRetry }) {
           ) : (
             <ul className="space-y-3">
               {activities.map((activity) => (
-                <ActivityItem key={activity.id} activity={activity} />
+                <ActivityItem key={activity.id} onClick={() => handleActivityClick(activity.id)} activity={activity} />
               ))}
             </ul>
           )}

@@ -3,10 +3,12 @@ import { supabase } from "../supabaseClient";
 import { useState, useEffect } from "react";
 import Loader from "./Loader";
 import { getCategoryBadgeClasses } from "../utils/colors";
+import { useNavigate } from "react-router-dom";
 
 export default function RecentActivities(){
     const [activities, setActivities] = useState([]);
     const [loading, setLoading] = useState(true);
+    const navigate = useNavigate();
     useEffect(() => {
         const fetchActivities = async () => {
             setLoading(true);
@@ -26,6 +28,10 @@ export default function RecentActivities(){
         }
         fetchActivities();
     }, []);
+    const handleActivityClick = (activityId) => {
+        navigate(`/view-edit-activity?id=${activityId}`);
+    };
+
     return(
         <>
             <Title>Recent Activities</Title>
@@ -36,6 +42,7 @@ export default function RecentActivities(){
                 ) : activities.map((activity, index) => (
                     <ActivitiesContent 
                         key={index}
+                        onClick={() => handleActivityClick(activity.id)}
                         activityName={activity.title}
                         solArch={activity.solarch}
                         activityDate={new Date(activity.created_at).toLocaleDateString()}
@@ -53,9 +60,9 @@ export default function RecentActivities(){
     );
 }
 
-export function ActivitiesContent({activityName, solArch, activityDate, activityTime, activityMode, badge, badgeColor}){
+export function ActivitiesContent({onClick, activityName, solArch, activityDate, activityTime, activityMode, badge, badgeColor}){
     return(
-        <div className="border border-gray-300 hover:bg-blue-100 hover:border-blue-300 hover:shadow-lg p-4 rounded-xl">
+        <div className="border border-gray-300 hover:bg-blue-100 hover:border-blue-300 hover:shadow-lg p-4 rounded-xl cursor-pointer" onClick={onClick}>
             <div className="flex justify-between">
                 <div>
                     <h4 className="font-semibold">{activityName}</h4>
