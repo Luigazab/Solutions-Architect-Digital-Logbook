@@ -6,55 +6,45 @@ import TextArea from "../components/TextArea";
 import TextInput from "../components/TextInput";
 import ModalCustomer from "../components/modals/ModalCustomer";
 import ModalAccountManager from "../components/modals/ModalAccountManager";
-import { insertActivity } from "../api/activity";
-import { supabase } from "../supabaseClient";
+import { activityService } from "../api/activity";
 
 export default function LogActivity() {
   const [category, setCategory] = useState(""); // state for activity category
   const [customer, setCustomer] = useState(""); // state for customer selection
-  const [customers, setCustomers] = useState(""); 
+  const [customers, setCustomers] = useState([]); 
   const [showModalCustomer, setShowModalCustomer] = useState(false);// state for customer modal visibility
   const [accountManager, setAccountManager] = useState();// state for account manager selection
-  const [accountManagers, setAccountManagers] = useState();
+  const [accountManagers, setAccountManagers] = useState([]);
   const [showModalAccountManager, setShowModalAccountManager] = useState(false);// state for account manager modal visibility
 
   useEffect(() => {
-    // Fetch account managers from the database
-    const fetchAccountManagers = async () => {
-      const { data, error } = await supabase
-        .from("account_managers")
-        .select("id, name");
-      if (!error) setAccountManagers(data || []);
-    };
-    fetchAccountManagers();
-    const fetchCustomers = async () => {
-      const { data, error } = await supabase
-        .from("customers")
-        .select("id, company_name");
-      if (!error) setCustomers(data || []);
-    };
-    fetchCustomers();
+    loadDropdownData();
   }, []);
+
+  const loadDropdownData = async () => {
+    try {
+      const [customersResult, managersResult] = await Promise.all([
+        activityService.fetchCustomers(),
+        activityService.fetchAccountManagers()
+      ]);
+
+      if (!customersResult.error) setCustomers(customersResult.data);
+      if (!managersResult.error) setAccountManagers(managersResult.data);
+    } catch (error) {
+      console.error("Error loading dropdown data:", error);
+    }
+  };
 
   const handleAccountManagerModalClose = () => {
     setShowModalAccountManager(false); 
     // Re-fetch account managers
-    supabase
-      .from("account_managers")
-      .select("id, name")
-      .then(({ data, error }) => {
-        if (!error) setAccountManagers(data || []);
-      });
+    loadDropdownData();
   }
+  
   const handleCustomerModalClose = () => {
     setShowModalCustomer(false); 
-    // Re-fetch customer
-    supabase
-      .from("customers")
-      .select("id, company_name")
-      .then(({ data, error }) => {
-        if (!error) setCustomers(data || []);
-      });
+    // Re-fetch customers
+    loadDropdownData();
   }
 
   const [form, setForm] = useState({
@@ -81,9 +71,10 @@ export default function LogActivity() {
   function handleChange(e) {
     setForm({ ...form, [e.target.name]: e.target.value });
   }
+  
   async function handleSubmit(e) {
     e.preventDefault();
-    const payload = {//Im sorry if this code is too messy, I just avoiding to change the structure of the form
+    const payload = {
       category: form.category,
       solarch: form.solarch,
       title: form.title,
@@ -103,7 +94,8 @@ export default function LogActivity() {
       training_provider: form.trainingProvider,
       certifications_earned: form.certificationsEarned,
     };
-    const { error } = await insertActivity(payload);
+    
+    const { error } = await activityService.insertActivity(payload);
     if (error) {
       alert("Error saving activity: " + error.message);
     }
@@ -170,7 +162,7 @@ export default function LogActivity() {
                 ]}
               />
             </div>
-            <TextInput label="Title" name="title" value={form.title} onChange={handleChange} type="text" placeholder="Bried title for this activity" />
+            <TextInput label="Title" name="title" value={form.title} onChange={handleChange} type="text" placeholder="Brief title for this activity" />
             <TextArea label="Description" name="description"  value={form.description} onChange={handleChange} placeholder="Detailed description of the activity" />
             
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
@@ -194,17 +186,13 @@ export default function LogActivity() {
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <SelectField classfield="flex gap-2 mt-1" selectmessage="Select Customer" label="Customer" name="customer" value={form.customer} onChange={(e) => {setCustomer(e.target.value); handleChange(e)}}
-                options={[
-                  ...(customers || []).map(customer => ({ value: customer.id, label: customer.company_name })),
-                ]}
+                options={customers.map(customer => ({ value: customer.id, label: customer.company_name }))}
                 >
                 <button type="button" onClick={() => setShowModalCustomer(true)} className="bg-white border border-neutral-300 hover:bg-gray-800 hover:text-white px-3 rounded"><svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4v16m8-8H4" /></svg></button>
               </SelectField>
               
               <SelectField classfield="flex gap-2 mt-1" selectmessage="Select Account Manager" label="Account Manager" name="accountManager" value={form.accountManager} onChange={(e) => {setAccountManager(e.target.value); handleChange(e)}}
-                options={[
-                  ...(accountManagers || []).map(manager => ({ value: manager.id, label: manager.name })),
-                ]}
+                options={accountManagers.map(manager => ({ value: manager.id, label: manager.name }))}
                 >
                 <button type="button" onClick={() => setShowModalAccountManager(true)} className="bg-white border border-neutral-300 hover:bg-gray-800 hover:text-white px-3 rounded"> <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4v16m8-8H4" /></svg></button>
               </SelectField>
@@ -215,10 +203,10 @@ export default function LogActivity() {
             {(category === "client_visit" || category === "meetings_attended") && (
               <div className="space-y-4">
                 <TextInput label="Meeting Participants" placeholder="Add participant name" name="meetingParticipants" value={form.meetingParticipants} onChange={handleChange} classfield="flex gap-2 mt-1">
-                  <button type="button" class="bg-gray-800 text-white px-3 rounded"><svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" /></svg></button>
+                  <button type="button" className="bg-gray-800 text-white px-3 rounded"><svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4v16m8-8H4" /></svg></button>
                 </TextInput>
                 <TextInput label="Technologies Discussed" placeholder="Add technology" name="technologiesDiscussed" value={form.technologiesDiscussed} onChange={handleChange} classfield="flex gap-2 mt-1">
-                  <button type="button" class="bg-gray-800 text-white px-3 rounded"><svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" /></svg></button>
+                  <button type="button" className="bg-gray-800 text-white px-3 rounded"><svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4v16m8-8H4" /></svg></button>
                 </TextInput>
 
                 <TextArea label="Outcomes" name="outcomes" value={form.outcomes} onChange={handleChange} placeholder="Key outcomes and decisions" />

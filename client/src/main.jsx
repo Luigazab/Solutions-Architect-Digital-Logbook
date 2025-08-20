@@ -6,6 +6,7 @@ import DashboardLayout from './layouts/DashboardLayout.jsx';
 import Auth from './layouts/AuthenticationLayout.jsx';
 import Home from './pages/Home';
 import LogActivity from './pages/LogActivity';
+import ViewEditActivity from './pages/ViewEditLogActivity.jsx';
 import Customer from './pages/Customer';
 import Login from './pages/Login.jsx';
 import Report from './pages/Report.jsx';
@@ -32,6 +33,7 @@ createRoot(document.getElementById('root')).render(
           }>
           <Route index element={<Home />} /> {/* index = default content */}
           <Route path="log-activity" element={<LogActivity />} />
+          <Route path="view-edit-activity" element={<ViewEditActivity />} />
           <Route path="customer" element={<Customer />} />
           <Route path="report" element={<Report />} />
           <Route path="schedule" element={<Schedule />} />

@@ -1,10 +1,10 @@
-"use client";
 import { useEffect, useState } from "react";
+import { useNavigate } from 'react-router-dom';
 import SummaryCard from "../components/SummaryCard";
 import { Title, Subtitle, Description} from "../components/Text";
-import { supabase } from "../supabaseClient";
 import Loader from "../components/Loader";
 import { getCategoryBadgeClasses, getColorClasses } from '../utils/colors';
+import { activityService } from '../api/activity';
 
 const exportToCSV = (data, filename) => {
   if (!data.length) return;
@@ -33,6 +33,7 @@ const exportToCSV = (data, filename) => {
 };
 
 export default function Report(){
+    const navigate = useNavigate();
     const [summary, setSummary] = useState({
         totalActivities: 0,
         averageActivities: 0,
@@ -45,89 +46,48 @@ export default function Report(){
     const [searchTerm, setSearchTerm] = useState("");   
 
     useEffect(() => {
-        async function fetchData() {
+        fetchData();
+    }, []);
+
+    const fetchData = async () => {
+        try {
             setLoading(true);
-            const { data: activitiesData, error: activitiesError } = await supabase 
-                .from("activities")
-                .select(`*, category:categories (category_name, color), customer:customers (company_name, location)`);
-            if (activitiesError) {
-                console.error("Error fetching activities:", activitiesError);
+            const { data: activitiesData, error } = await activityService.fetchActivities();
+            
+            if (error) {
+                console.error("Error fetching activities:", error);
                 setLoading(false);
                 return;
             }
-            const totalActivities = activitiesData.length;
-            const averageActivities = totalActivities > 0 ? totalActivities / 12 : 0; // Assuming 12 months
-            const totalCertifications = activitiesData.filter(activity => activity.category?.category_name === "Technical Training").length;
 
-            const categories = {};
-            activitiesData.forEach((a) => {
-                const catKey = a.category?.category_name || "Uncategorized";
-                if (!categories[catKey]) {
-                    categories[catKey] = { count: 0, color: a.category?.color || "#999" };
-                }
-                categories[catKey].count++;
-            });
+            // Generate summary statistics
+            const summaryStats = activityService.generateSummary(activitiesData);
+            setSummary(summaryStats);
 
-            const customerActivity = {};
-            activitiesData.forEach((activity) => {
-                if (activity.customer && activity.customer.company_name) {
-                const customerKey = activity.customer.company_name;
-                if (!customerActivity[customerKey]) {
-                    customerActivity[customerKey] = {
-                    company_name: activity.customer.company_name,
-                    location: activity.customer.location,
-                    count: 0,
-                    lastActivity: activity.date
-                    };
-                }
-                customerActivity[customerKey].count++;
-                // Keep track of most recent activity
-                if (new Date(activity.date) > new Date(customerActivity[customerKey].lastActivity)) {
-                    customerActivity[customerKey].lastActivity = activity.date;
-                }
-                }
-            });
+            // Generate breakdown by category
+            const categoryBreakdown = activityService.generateCategoryBreakdown(activitiesData);
+            setBreakdown(categoryBreakdown);
 
-            // Convert to array and sort by activity count
-            const sortedCustomers = Object.values(customerActivity)
-                .sort((a, b) => b.count - a.count)
-                .map((customer, index) => ({
-                ...customer,
-                rank: index + 1,
-                color: getCustomerColor(index)
-                }));
+            // Generate customer statistics
+            const customerStatistics = activityService.generateCustomerStats(activitiesData);
+            setCustomerStats(customerStatistics);
 
-            setCustomerStats(sortedCustomers);
-
-            setBreakdown(Object.entries(categories).map(([name, info]) => ({
-                category_name: name,
-                count: info.count,
-                color: info.color
-            })));
-            setSummary({
-                totalActivities,
-                averageActivities: Math.round(averageActivities * 100) / 100, // Round to 2 decimal places
-                totalCertifications
-            });
             setActivities(activitiesData);
+        } catch (error) {
+            console.error("Error fetching data:", error);
+        } finally {
             setLoading(false);
         }
-        fetchData();
-    }, []);
-     const getCustomerInitials = (companyName) => {
-    if (!companyName) return "??";
-    return companyName
-      .split(' ')
-      .map(word => word[0])
-      .join('')
-      .substring(0, 2)
-      .toUpperCase();
-  };
+    };
 
-    // Helper function to get color for customer based on rank
-    const getCustomerColor = (index) => {
-        const colors = ['blue', 'green', 'purple', 'orange', 'pink', 'teal', 'red', 'indigo'];
-        return colors[index % colors.length];
+    const getCustomerInitials = (companyName) => {
+        if (!companyName) return "??";
+        return companyName
+            .split(' ')
+            .map(word => word[0])
+            .join('')
+            .substring(0, 2)
+            .toUpperCase();
     };
 
     // Helper function to format last activity date
@@ -152,14 +112,19 @@ export default function Report(){
 
     const handleExportCSV = () => {
         const exportData = filteredActivities.map(activity => ({
-        Date: new Date(activity.date).toLocaleDateString(),
-        'Solution Architect': activity.solarch,
-        Activity: activity.title,
-        Category: activity.category?.category_name,
-        Location: activity.customer?.location,
-        Customer: activity.customer?.company_name || "No customer"
+            Date: new Date(activity.date).toLocaleDateString(),
+            'Solution Architect': activity.solarch,
+            Activity: activity.title,
+            Category: activity.category?.category_name,
+            Location: activity.customer?.location,
+            Customer: activity.customer?.company_name || "No customer"
         }));
         exportToCSV(exportData, 'activities-report.csv');
+    };
+
+    // Handle row click to navigate to view/edit page
+    const handleRowClick = (activityId) => {
+        navigate(`/view-edit-activity?id=${activityId}`);
     };
 
     return(
@@ -174,7 +139,7 @@ export default function Report(){
                             <Title>Certifications</Title>
                             <Description>per Solution Architect</Description>
                         </div>
-                        <span><svg class="w-10 h-10" viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg"><path fill="currentColor" d="M688 264c0-4.4-3.6-8-8-8H296c-4.4 0-8 3.6-8 8v48c0 4.4 3.6 8 8 8h384c4.4 0 8-3.6 8-8zm-8 136H296c-4.4 0-8 3.6-8 8v48c0 4.4 3.6 8 8 8h384c4.4 0 8-3.6 8-8v-48c0-4.4-3.6-8-8-8M480 544H296c-4.4 0-8 3.6-8 8v48c0 4.4 3.6 8 8 8h184c4.4 0 8-3.6 8-8v-48c0-4.4-3.6-8-8-8m-48 308H208V148h560v344c0 4.4 3.6 8 8 8h56c4.4 0 8-3.6 8-8V108c0-17.7-14.3-32-32-32H168c-17.7 0-32 14.3-32 32v784c0 17.7 14.3 32 32 32h264c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8m356.8-74.4c29-26.3 47.2-64.3 47.2-106.6 0-79.5-64.5-144-144-144s-144 64.5-144 144c0 42.3 18.2 80.3 47.2 106.6-57 32.5-96.2 92.7-99.2 162.1-.2 4.5 3.5 8.3 8 8.3h48.1c4.2 0 7.7-3.3 8-7.6C564 871.2 621.7 816 692 816s128 55.2 131.9 124.4c.2 4.2 3.7 7.6 8 7.6H880c4.6 0 8.2-3.8 8-8.3-2.9-69.5-42.2-129.6-99.2-162.1M692 591c44.2 0 80 35.8 80 80s-35.8 80-80 80-80-35.8-80-80 35.8-80 80-80"/></svg></span>
+                        <span><svg className="w-10 h-10" viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg"><path fill="currentColor" d="M688 264c0-4.4-3.6-8-8-8H296c-4.4 0-8 3.6-8 8v48c0 4.4 3.6 8 8 8h384c4.4 0 8-3.6 8-8zm-8 136H296c-4.4 0-8 3.6-8 8v48c0 4.4 3.6 8 8 8h384c4.4 0 8-3.6 8-8v-48c0-4.4-3.6-8-8-8M480 544H296c-4.4 0-8 3.6-8 8v48c0 4.4 3.6 8 8 8h184c4.4 0 8-3.6 8-8v-48c0-4.4-3.6-8-8-8m-48 308H208V148h560v344c0 4.4 3.6 8 8 8h56c4.4 0 8-3.6 8-8V108c0-17.7-14.3-32-32-32H168c-17.7 0-32 14.3-32 32v784c0 17.7 14.3 32 32 32h264c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8m356.8-74.4c29-26.3 47.2-64.3 47.2-106.6 0-79.5-64.5-144-144-144s-144 64.5-144 144c0 42.3 18.2 80.3 47.2 106.6-57 32.5-96.2 92.7-99.2 162.1-.2 4.5 3.5 8.3 8 8.3h48.1c4.2 0 7.7-3.3 8-7.6C564 871.2 621.7 816 692 816s128 55.2 131.9 124.4c.2 4.2 3.7 7.6 8 7.6H880c4.6 0 8.2-3.8 8-8.3-2.9-69.5-42.2-129.6-99.2-162.1M692 591c44.2 0 80 35.8 80 80s-35.8 80-80 80-80-35.8-80-80 35.8-80 80-80"/></svg></span>
                     </div>
                     <hr className="mb-4" />
                     <div className="flex flex-col justify-between gap-4">
@@ -184,11 +149,12 @@ export default function Report(){
                         <hr />
                         {ArchitectCertReport("https://www.macrologic.com.ph/wp-content/uploads/2023/10/luigazab.jpg", "Luigazab", "Solution Architect", "Certified Solution Architect", "2")}
                         <hr />
-                        <div class="flex justify-end">
-                            <a href="certificate.html" class="bg-gray-100 text-sm font-medium text-gray-800 border border-gray-300 px-4 py-2 rounded hover:bg-slate-800 hover:text-neutral-200">View Certificates</a>
+                        <div className="flex justify-end">
+                            <a href="certificate.html" className="bg-gray-100 text-sm font-medium text-gray-800 border border-gray-300 px-4 py-2 rounded hover:bg-slate-800 hover:text-neutral-200">View Certificates</a>
                         </div>
                     </div>
                 </div>
+                
                 <div className="bg-white p-4 sm:col-span-3 md:col-span-2 lg:col-span-1 rounded-xl shadow">
                     <h3 className="text-2xl font-semibold mb-4">Activities Breakdown</h3>
                     <ul className="space-y-2">
@@ -212,44 +178,44 @@ export default function Report(){
                     
                     {loading ? (
                         <div className="flex justify-center py-8">
-                        <Loader />
+                            <Loader />
                         </div>
                     ) : customerStats.length > 0 ? (
                         <>
-                        <div className="max-h-64 md:max-h-24 overflow-y-auto pr-2 space-y-3 scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100">
-                            {customerStats.map((customer, index) => {
-                            const colors = getColorClasses(customer.color);
-                            const gradientClass = `bg-gradient-to-r from-${customer.color}-50 to-${customer.color}-100`;
-                            const borderClass = `border-${customer.color}-200`;
-                            
-                            return (
-                                <div key={customer.company_name} className={`flex items-center justify-between p-3 ${gradientClass} rounded-lg border ${borderClass} hover:shadow-md transition-all duration-200 cursor-pointer`}>
-                                <div className="flex items-center space-x-3">
-                                    <div className={`w-10 h-10 bg-${customer.color}-500 rounded-lg flex items-center justify-center shadow-sm`}>
-                                        <span className="text-white font-bold text-sm" >
-                                            {getCustomerInitials(customer.company_name)}
-                                        </span>
-                                    </div>
-                                    <div>
-                                        <h4 className="font-semibold text-gray-900">{customer.company_name}</h4>
-                                        <p className="text-sm text-gray-600">{customer.location} • Last activity: {formatLastActivity(customer.lastActivity)}</p>
-                                    </div>
-                                </div>
-                                <div className="text-right">
-                                    <div className={`text-lg font-bold ${colors.text}`}>{customer.count}</div>
-                                    <div className="text-xs text-gray-500">{customer.count === 1 ? 'activity' : 'activities'}</div>
-                                </div>
-                                </div>
-                                );
-                            })}
-                        </div>
-
-                        <div className="mt-4 pt-3 border-t border-gray-200">
-                            <div className="flex items-center justify-between text-sm">
-                                <span className="text-gray-600">Total Active Customers</span>
-                                <span className="font-semibold text-gray-900">{customerStats.length}</span>
+                            <div className="max-h-64 md:max-h-24 overflow-y-auto pr-2 space-y-3 scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100">
+                                {customerStats.map((customer, index) => {
+                                    const colors = getColorClasses(customer.color);
+                                    const gradientClass = `bg-gradient-to-r from-${customer.color}-50 to-${customer.color}-100`;
+                                    const borderClass = `border-${customer.color}-200`;
+                                    
+                                    return (
+                                        <div key={customer.company_name} className={`flex items-center justify-between p-3 ${gradientClass} rounded-lg border ${borderClass} hover:shadow-md transition-all duration-200 cursor-pointer`}>
+                                            <div className="flex items-center space-x-3">
+                                                <div className={`w-10 h-10 bg-${customer.color}-500 rounded-lg flex items-center justify-center shadow-sm`}>
+                                                    <span className="text-white font-bold text-sm">
+                                                        {getCustomerInitials(customer.company_name)}
+                                                    </span>
+                                                </div>
+                                                <div>
+                                                    <h4 className="font-semibold text-gray-900">{customer.company_name}</h4>
+                                                    <p className="text-sm text-gray-600">{customer.location} • Last activity: {formatLastActivity(customer.lastActivity)}</p>
+                                                </div>
+                                            </div>
+                                            <div className="text-right">
+                                                <div className={`text-lg font-bold ${colors.text}`}>{customer.count}</div>
+                                                <div className="text-xs text-gray-500">{customer.count === 1 ? 'activity' : 'activities'}</div>
+                                            </div>
+                                        </div>
+                                    );
+                                })}
                             </div>
-                        </div>
+
+                            <div className="mt-4 pt-3 border-t border-gray-200">
+                                <div className="flex items-center justify-between text-sm">
+                                    <span className="text-gray-600">Total Active Customers</span>
+                                    <span className="font-semibold text-gray-900">{customerStats.length}</span>
+                                </div>
+                            </div>
                         </>
                     ) : (
                         <div className="flex flex-col items-center justify-center py-8 text-gray-400">
@@ -259,25 +225,27 @@ export default function Report(){
                     )}
                 </div>
             </div>
+            
             <div className="bg-white p-4 rounded-xl shadow">
                 <div className="flex flex-col gap-4 md:flex-row md:justify-between md:items-center mb-4">
                     <div>
                         <Title>Activity Details</Title>
-                        <Subtitle>Click row for detailed info</Subtitle>
+                        <Subtitle>Click row to view/edit activity details</Subtitle>
                     </div>
                     
                     <label className="flex items-center gap-2 h-10 w-full max-w-lg rounded-md border border-input bg-background px-3 py-2 text-base text-muted-foreground focus-within:ring-teal-800 focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-1 md:text-sm">
-                    <svg className="w-5 h-5 text-gray-500" viewBox="0 0 15 15" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path fillRule="evenodd" clipRule="evenodd" d="M10 6.5a3.5 3.5 0 1 1-7 0 3.5 3.5 0 0 1 7 0m-.691 3.516a4.5 4.5 0 1 1 .707-.707l2.838 2.837a.5.5 0 0 1-.708.708z" fill="#000"/>
-                    </svg>
-                    <input 
-                        type="text" 
-                        placeholder="Search activities..." 
-                        className="w-full bg-transparent outline-none placeholder:text-muted-foreground"
-                        value={searchTerm}
-                        onChange={(e) => setSearchTerm(e.target.value)}
-                    />
+                        <svg className="w-5 h-5 text-gray-500" viewBox="0 0 15 15" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path fillRule="evenodd" clipRule="evenodd" d="M10 6.5a3.5 3.5 0 1 1-7 0 3.5 3.5 0 0 1 7 0m-.691 3.516a4.5 4.5 0 1 1 .707-.707l2.838 2.837a.5.5 0 0 1-.708.708z" fill="#000"/>
+                        </svg>
+                        <input 
+                            type="text" 
+                            placeholder="Search activities..." 
+                            className="w-full bg-transparent outline-none placeholder:text-muted-foreground"
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                        />
                     </label>
+                    
                     <div className="flex justify-end md:gap-2">
                         <a href="log-activity" className="inline-flex items-center border rounded-lg p-2 bg-slate-700 font-medium text-neutral-100 hover:bg-slate-800 hover:text-neutral-200">Log Activity</a>
                         <button 
@@ -288,17 +256,18 @@ export default function Report(){
                         </button>
                     </div>
                 </div>
+                
                 <div className="overflow-x-auto w-full">
                 <table className="w-full text-left border-t min-w-full border-gray-200 space-x-8 space-y-4">
                 <thead>
                     <tr className="text-gray-500 text-sm">
-                    <th className="py-2"></th>
-                    <th className="py-2">Date</th>
-                    <th className="py-2">Solution Architect</th>
-                    <th className="py-2">Activity</th>
-                    <th className="py-2">Category</th>
-                    <th className="py-2">Location</th>
-                    <th className="py-2">Customer</th>
+                        <th className="py-2"></th>
+                        <th className="py-2">Date</th>
+                        <th className="py-2">Solution Architect</th>
+                        <th className="py-2">Activity</th>
+                        <th className="py-2">Category</th>
+                        <th className="py-2">Location</th>
+                        <th className="py-2">Customer</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -310,34 +279,38 @@ export default function Report(){
                         </tr>
                     ) : filteredActivities.length > 0 ? (
                         filteredActivities.map((activity, index) => (
-                        <tr key={activity.id} className="border-b border-gray-100 hover:bg-blue-50 transition-colors">
-                            <td className="py-3 px-2 text-gray-500">{index + 1}</td>
-                            <td className="py-3 px-2">{new Date(activity.date).toLocaleDateString()}</td>
-                            <td className="py-3 px-2 font-medium">{activity.solarch}</td>
-                            <td className="py-3 px-2">{activity.title}</td>
-                            <td className="py-3 px-2">
-                            <span className={getCategoryBadgeClasses(activity.category?.color)}>
-                                {activity.category?.category_name}
-                            </span>
-                            </td>
-                            <td className="py-3 px-2 text-gray-600">{activity.customer?.location}</td>
-                            <td className="py-3 px-2 text-gray-600">{activity.customer?.company_name || "No customer"}</td>
-                        </tr>
+                            <tr key={activity.id} className="border-b border-gray-100 hover:bg-blue-50 transition-colors cursor-pointer"
+                                onClick={() => handleRowClick(activity.id)}
+                                title="Click to view/edit activity details"
+                            >
+                                <td className="py-3 px-2 text-gray-500">{index + 1}</td>
+                                <td className="py-3 px-2">{new Date(activity.date).toLocaleDateString()}</td>
+                                <td className="py-3 px-2 font-medium">{activity.solarch}</td>
+                                <td className="py-3 px-2">{activity.title}</td>
+                                <td className="py-3 px-2">
+                                    <span className={getCategoryBadgeClasses(activity.category?.color)}>
+                                        {activity.category?.category_name}
+                                    </span>
+                                </td>
+                                <td className="py-3 px-2 text-gray-600">{activity.customer?.location}</td>
+                                <td className="py-3 px-2 text-gray-600">{activity.customer?.company_name || "No customer"}</td>
+                            </tr>
                         ))
                     ) : (
                         <tr>
-                        <td colSpan="7" className="text-center py-8 text-gray-500">
-                            {searchTerm ? `No activities found matching "${searchTerm}"` : "No activities found for the selected period."}
-                        </td>
+                            <td colSpan="7" className="text-center py-8 text-gray-500">
+                                {searchTerm ? `No activities found matching "${searchTerm}"` : "No activities found for the selected period."}
+                            </td>
                         </tr>
                     )}
-                    </tbody>
+                </tbody>
                 </table>
                 </div>
             </div>
         </>
     );
 }
+
 export function ArchitectCertReport(image, altText, name, role, value) {
     return (
         <div className="flex justify-between items-center">
