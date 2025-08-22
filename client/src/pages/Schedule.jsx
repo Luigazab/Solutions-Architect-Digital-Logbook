@@ -3,6 +3,7 @@ import { useState, useEffect, useCallback } from "react";
 import { supabase } from "../supabaseClient";
 import { getCategoryBadgeClasses } from '../utils/colors';
 import { useNavigate } from "react-router-dom";
+import { exportMonthlyScheduleToExcel } from "../api/scheduleExport";
 
 // Loading Spinner Component
 function LoadingSpinner({ size = "sm" }) {
@@ -198,7 +199,7 @@ function ActivityItem({ activity, onClick }) {
 }
 
 // Right Panel
-function RightPanel({ activities, selectedDate, loading, error, onRetry }) {
+function RightPanel({ activities, selectedDate, loading, error, onRetry, onExportExcel, exportingExcel }) {
   if (error) {
     return (
       <div className="bg-white border rounded-lg p-6">
@@ -212,9 +213,28 @@ function RightPanel({ activities, selectedDate, loading, error, onRetry }) {
     navigate(`/view-edit-activity?id=${activityId}`);
   };
 
-
   return (
     <div className="bg-white border rounded-lg p-6 text-gray-700">
+      {/* Export Excel Button */}
+      <div className="mb-4 flex justify-end">
+        <button
+          onClick={onExportExcel}
+          disabled={exportingExcel}
+          className="inline-flex items-center px-4 py-2 bg-emerald-700 text-white text-sm font-medium rounded-md hover:scale-101 hover:bg-emerald-800 hover:shadow disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+        >
+          {exportingExcel ? (
+            <>
+              <LoadingSpinner size="sm" />
+              <span className="ml-2">Generating...</span>
+            </>
+          ) : (
+            <>
+              Export Schedule
+            </>
+          )}
+        </button>
+      </div>
+
       {!selectedDate ? (
         <div className="flex flex-col items-center text-center justify-center text-gray-500">
           <svg className="w-10 h-10 m-2" viewBox="0 0 15 15" fill="none" xmlns="http://www.w3.org/2000/svg"><path fillRule="evenodd" clipRule="evenodd" d="M4.5 1a.5.5 0 0 1 .5.5V2h5v-.5a.5.5 0 0 1 1 0V2h1.5A1.5 1.5 0 0 1 14 3.5v9a1.5 1.5 0 0 1-1.5 1.5h-10A1.5 1.5 0 0 1 1 12.5v-9A1.5 1.5 0 0 1 2.5 2H4v-.5a.5.5 0 0 1 .5-.5M10 3v.5a.5.5 0 0 0 1 0V3h1.5a.5.5 0 0 1 .5.5V5H2V3.5a.5.5 0 0 1 .5-.5H4v.5a.5.5 0 0 0 1 0V3zM2 6v6.5a.5.5 0 0 0 .5.5h10a.5.5 0 0 0 .5-.5V6zm5 1.5a.5.5 0 1 1 1 0 .5.5 0 0 1-1 0M9.5 7a.5.5 0 1 0 0 1 .5.5 0 0 0 0-1m1.5.5a.5.5 0 1 1 1 0 .5.5 0 0 1-1 0m.5 1.5a.5.5 0 1 0 0 1 .5.5 0 0 0 0-1M9 9.5a.5.5 0 1 1 1 0 .5.5 0 0 1-1 0M7.5 9a.5.5 0 1 0 0 1 .5.5 0 0 0 0-1M5 9.5a.5.5 0 1 1 1 0 .5.5 0 0 1-1 0M3.5 9a.5.5 0 1 0 0 1 .5.5 0 0 0 0-1M3 11.5a.5.5 0 1 1 1 0 .5.5 0 0 1-1 0m2.5-.5a.5.5 0 1 0 0 1 .5.5 0 0 0 0-1m1.5.5a.5.5 0 1 1 1 0 .5.5 0 0 1-1 0m2.5-.5a.5.5 0 1 0 0 1 .5.5 0 0 0 0-1" fill="currentColor"/></svg>
@@ -269,6 +289,26 @@ export default function ActivityCalendar() {
   const [dayLoading, setDayLoading] = useState(false);
   const [error, setError] = useState(null);
   const [dayError, setDayError] = useState(null);
+  // Add this to your ActivityCalendar component state declarations:
+  const [exportingExcel, setExportingExcel] = useState(false);
+
+  // Add this export handler function in your ActivityCalendar component:
+  const handleExportExcel = async () => {
+    setExportingExcel(true);
+    try {
+      await exportMonthlyScheduleToExcel(
+        month.getMonth(), 
+        month.getFullYear(), 
+        allActivities
+      );
+    } catch (error) {
+      console.error('Export failed:', error);
+      // You might want to show an error message to the user
+      alert(`Export failed: ${error.message}`);
+    } finally {
+      setExportingExcel(false);
+    }
+  };
 
   // Load activities for the month with caching
   const fetchMonthData = useCallback(async (targetMonth) => {
@@ -396,6 +436,8 @@ export default function ActivityCalendar() {
         loading={dayLoading}
         error={dayError}
         onRetry={handleRetryDay}
+        onExportExcel={handleExportExcel}
+        exportingExcel={exportingExcel}
       />
     </main>
   );
