@@ -5,32 +5,8 @@ import { Title, Subtitle, Description} from "../components/Text";
 import Loader from "../components/Loader";
 import { getCategoryBadgeClasses, getColorClasses } from '../utils/colors';
 import { activityService } from '../api/activity';
-
-const exportToCSV = (data, filename) => {
-  if (!data.length) return;
-  const csvRows = [];
-
-  // Headers
-  const headers = Object.keys(data[0]);
-  csvRows.push(headers.join(","));
-
-  // Rows
-  for (const row of data) {
-    const values = headers.map(h => `"${row[h] ?? ""}"`);
-    csvRows.push(values.join(","));
-  }
-
-  // Download
-  const blob = new Blob([csvRows.join("\n")], { type: "text/csv" });
-  const url = window.URL.createObjectURL(blob);
-  const a = document.createElement("a");
-  a.setAttribute("hidden", "");
-  a.setAttribute("href", url);
-  a.setAttribute("download", filename);
-  document.body.appendChild(a);
-  a.click();
-  document.body.removeChild(a);
-};
+import { excelExportService } from '../api/excelExport';
+import SelectField from "../components/Dropdown";
 
 export default function Report(){
     const navigate = useNavigate();
@@ -43,11 +19,44 @@ export default function Report(){
     const [activities, setActivities] = useState([]);
     const [loading, setLoading] = useState(true);
     const [customerStats, setCustomerStats] = useState([]);
-    const [searchTerm, setSearchTerm] = useState("");   
+    const [searchTerm, setSearchTerm] = useState("");
+    
+    // Filter states
+    const [filters, setFilters] = useState({
+        timeframe: '', solarch: '', category: ''
+    });
+
+    // Options for dropdowns
+    const [filterOptions, setFilterOptions] = useState({
+        timeframes: [
+            { value: 'last_week', label: 'Last Week' },
+            { value: 'last_month', label: 'Last Month' },
+            { value: 'last_3_months', label: 'Last 3 Months' },
+            { value: 'last_6_months', label: 'Last 6 Months' },
+            { value: 'last_year', label: 'Last Year' }
+        ],
+        solarches: [],
+        categories: []
+    });
 
     useEffect(() => {
         fetchData();
     }, []);
+
+    useEffect(() => {
+        // Update summary and breakdown when activities or filters change
+        if (activities.length > 0) {
+            const filtered = getFilteredActivities();
+            const summaryStats = activityService.generateSummary(filtered);
+            setSummary(summaryStats);
+            
+            const categoryBreakdown = activityService.generateCategoryBreakdown(filtered);
+            setBreakdown(categoryBreakdown);
+            
+            const customerStatistics = activityService.generateCustomerStats(filtered);
+            setCustomerStats(customerStatistics);
+        }
+    }, [activities, filters, searchTerm]);
 
     const fetchData = async () => {
         try {
@@ -60,19 +69,18 @@ export default function Report(){
                 return;
             }
 
-            // Generate summary statistics
-            const summaryStats = activityService.generateSummary(activitiesData);
-            setSummary(summaryStats);
-
-            // Generate breakdown by category
-            const categoryBreakdown = activityService.generateCategoryBreakdown(activitiesData);
-            setBreakdown(categoryBreakdown);
-
-            // Generate customer statistics
-            const customerStatistics = activityService.generateCustomerStats(activitiesData);
-            setCustomerStats(customerStatistics);
-
             setActivities(activitiesData);
+
+            // Extract unique solution architects and categories for filter options
+            const uniqueSolarches = [...new Set(activitiesData.map(a => a.solarch))];
+            const uniqueCategories = [...new Set(activitiesData.map(a => a.category?.category_name).filter(Boolean))];
+            
+            setFilterOptions(prev => ({
+                ...prev,
+                solarches: uniqueSolarches.map(s => ({ value: s.toLowerCase(), label: s })),
+                categories: uniqueCategories.map(c => ({ value: c.toLowerCase().replace(' ', '_'), label: c }))
+            }));
+
         } catch (error) {
             console.error("Error fetching data:", error);
         } finally {
@@ -90,7 +98,6 @@ export default function Report(){
             .toUpperCase();
     };
 
-    // Helper function to format last activity date
     const formatLastActivity = (dateString) => {
         const date = new Date(dateString);
         const now = new Date();
@@ -103,26 +110,92 @@ export default function Report(){
         return date.toLocaleDateString();
     };
 
-    // Filter activities based on search term
-    const filteredActivities = activities.filter(activity =>
-        activity.customer?.company_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        activity.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        activity.solarch.toLowerCase().includes(searchTerm.toLowerCase())
-    );
+    // Enhanced filtering function
+    const getFilteredActivities = () => {
+        return activities.filter(activity => {
+            // Text search filter
+            const matchesSearch = !searchTerm || 
+                activity.customer?.company_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                activity.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                activity.solarch.toLowerCase().includes(searchTerm.toLowerCase());
 
-    const handleExportCSV = () => {
-        const exportData = filteredActivities.map(activity => ({
-            Date: new Date(activity.date).toLocaleDateString(),
-            'Solution Architect': activity.solarch,
-            Activity: activity.title,
-            Category: activity.category?.category_name,
-            Location: activity.customer?.location,
-            Customer: activity.customer?.company_name || "No customer"
-        }));
-        exportToCSV(exportData, 'activities-report.csv');
+            // Solution Architect filter
+            const matchesSolarch = !filters.solarch || 
+                activity.solarch.toLowerCase() === filters.solarch;
+
+            // Category filter
+            const matchesCategory = !filters.category || 
+                activity.category?.category_name?.toLowerCase().replace(' ', '_') === filters.category;
+
+            // Timeframe filter
+            let matchesTimeframe = true;
+            if (filters.timeframe) {
+                const activityDate = new Date(activity.date);
+                const now = new Date();
+                
+                switch (filters.timeframe) {
+                    case 'last_week':
+                        matchesTimeframe = activityDate >= new Date(now.setDate(now.getDate() - 7));
+                        break;
+                    case 'last_month':
+                        matchesTimeframe = activityDate >= new Date(now.setMonth(now.getMonth() - 1));
+                        break;
+                    case 'last_3_months':
+                        matchesTimeframe = activityDate >= new Date(now.setMonth(now.getMonth() - 3));
+                        break;
+                    case 'last_6_months':
+                        matchesTimeframe = activityDate >= new Date(now.setMonth(now.getMonth() - 6));
+                        break;
+                    case 'last_year':
+                        matchesTimeframe = activityDate >= new Date(now.setFullYear(now.getFullYear() - 1));
+                        break;
+                    default:
+                        matchesTimeframe = true;
+                }
+            }
+
+            return matchesSearch && matchesSolarch && matchesCategory && matchesTimeframe;
+        });
     };
 
-    // Handle row click to navigate to view/edit page
+    const filteredActivities = getFilteredActivities();
+
+    const handleFilterChange = (filterName, value) => {
+        setFilters(prev => ({
+            ...prev,
+            [filterName]: value
+        }));
+    };
+
+    const clearFilters = () => {
+        setFilters({
+            timeframe: '', solarch: '', category: ''
+        });
+        setSearchTerm('');
+    };
+
+    // Updated export handlers using the service
+    const handleExportExcel = () => {
+        try {
+            excelExportService.exportActivitiesToExcel(
+                filteredActivities, filters, summary, breakdown, customerStats
+            );
+        } catch (error) {
+            console.error('Error exporting to Excel:', error);
+            alert('Error creating Excel file. Please try again.');
+        }
+    };
+
+    const handleExportCSV = () => {
+        try {
+            const filename = `activities-report-${new Date().toISOString().split('T')[0]}.csv`;
+            excelExportService.exportToCSV(filteredActivities, filename);
+        } catch (error) {
+            console.error('Error exporting to CSV:', error);
+            alert('Error creating CSV file. Please try again.');
+        }
+    };
+
     const handleRowClick = (activityId) => {
         navigate(`/view-edit-activity?id=${activityId}`);
     };
@@ -133,6 +206,7 @@ export default function Report(){
                 <SummaryCard title="Total Activities" value={summary.totalActivities} subtitle="Tracked"><span><svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 384 512"><path d="M249.9 66.8c10.4-14.3 7.2-34.3-7.1-44.7s-34.3-7.2-44.7 7.1l-106 145.7-37.5-37.5c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3l64 64c6.6 6.6 15.8 10 25.1 9.3s17.9-5.5 23.4-13.1l128-176zm128 136c10.4-14.3 7.2-34.3-7.1-44.7s-34.3-7.2-44.7 7.1l-170 233.7-69.5-69.5c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3l96 96c6.6 6.6 15.8 10 25.1 9.3s17.9-5.5 23.4-13.1l192-264z"/></svg></span></SummaryCard>
                 <SummaryCard title="Average Activities" value={summary.averageActivities} subtitle="Per month"><svg class="w-5 h-5" viewBox="0 0 52 52" data-name="Layer 1" xmlns="http://www.w3.org/2000/svg"><path d="M39.55 26A10.5 10.5 0 1 0 50 36.5 10.5 10.5 0 0 0 39.55 26m0 16.14a5.65 5.65 0 1 1 5.6-5.64 5.64 5.64 0 0 1-5.6 5.64M23 15.5a10.48 10.48 0 1 0-3.07 7.43A10.5 10.5 0 0 0 23 15.5m-10.5 5.64a5.65 5.65 0 1 1 4-1.65 5.63 5.63 0 0 1-4.01 1.65Zm26.71-15A.8.8 0 0 0 38.49 5h-3a.83.83 0 0 0-.64.4l-22 40.41a.78.78 0 0 0 0 .78.79.79 0 0 0 .68.39h3a.8.8 0 0 0 .64-.4l22-40.41Z"/></svg></SummaryCard>
                 <SummaryCard title="Total Certifications" value={summary.totalCertifications} subtitle="Attained Certification"><svg class="w-5 h-5" viewBox="0 0 15 15" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M9.5 14.5H9a.5.5 0 0 0 .8.4zm2-1.5.3-.4a.5.5 0 0 0-.6 0zm2 1.5-.3.4a.5.5 0 0 0 .8-.4zm-2-3.5A2.5 2.5 0 0 1 9 8.5H8a3.5 3.5 0 0 0 3.5 3.5zM14 8.5a2.5 2.5 0 0 1-2.5 2.5v1A3.5 3.5 0 0 0 15 8.5zM11.5 6A2.5 2.5 0 0 1 14 8.5h1A3.5 3.5 0 0 0 11.5 5zm0-1A3.5 3.5 0 0 0 8 8.5h1A2.5 2.5 0 0 1 11.5 6zM9 10.5v4h1v-4zm.8 4.4 2-1.5-.6-.8-2 1.5zm1.4-1.5 2 1.5.6-.8-2-1.5zm2.8 1.1v-4h-1v4zM15 5V1.5h-1V5zm-1.5-5h-12v1h12zM0 1.5v12h1v-12zM1.5 15H8v-1H1.5zM0 13.5A1.5 1.5 0 0 0 1.5 15v-1a.5.5 0 0 1-.5-.5zM1.5 0A1.5 1.5 0 0 0 0 1.5h1a.5.5 0 0 1 .5-.5zM15 1.5A1.5 1.5 0 0 0 13.5 0v1a.5.5 0 0 1 .5.5zM3 5h5V4H3zm0 3h3V7H3z" fill="#000"/></svg></SummaryCard>
+                
                 <div className="bg-white p-4 rounded-xl sm:col-span-3 md:col-span-1  shadow md:row-span-2">
                     <div className="flex justify-between items-center">
                         <div>
@@ -154,7 +228,7 @@ export default function Report(){
                         </div>
                     </div>
                 </div>
-                
+
                 <div className="bg-white p-4 sm:col-span-3 md:col-span-2 lg:col-span-1 rounded-xl shadow">
                     <h3 className="text-2xl font-semibold mb-4">Activities Breakdown</h3>
                     <ul className="space-y-2">
@@ -227,84 +301,153 @@ export default function Report(){
             </div>
             
             <div className="bg-white p-4 rounded-xl shadow">
-                <div className="flex flex-col gap-4 md:flex-row md:justify-between md:items-center mb-4">
+                <div className="flex flex-col gap-4 md:flex-row md:justify-between md:items-center">
                     <div>
                         <Title>Activity Details</Title>
                         <Subtitle>Click row to view/edit activity details</Subtitle>
                     </div>
                     
                     <label className="flex items-center gap-2 h-10 w-full max-w-lg rounded-md border border-input bg-background px-3 py-2 text-base text-muted-foreground focus-within:ring-teal-800 focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-1 md:text-sm">
-                        <svg className="w-5 h-5 text-gray-500" viewBox="0 0 15 15" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <path fillRule="evenodd" clipRule="evenodd" d="M10 6.5a3.5 3.5 0 1 1-7 0 3.5 3.5 0 0 1 7 0m-.691 3.516a4.5 4.5 0 1 1 .707-.707l2.838 2.837a.5.5 0 0 1-.708.708z" fill="#000"/>
-                        </svg>
-                        <input 
-                            type="text" 
-                            placeholder="Search activities..." 
-                            className="w-full bg-transparent outline-none placeholder:text-muted-foreground"
-                            value={searchTerm}
-                            onChange={(e) => setSearchTerm(e.target.value)}
-                        />
+                        <svg className="w-5 h-5 text-gray-500" viewBox="0 0 15 15" fill="none" xmlns="http://www.w3.org/2000/svg"><path fillRule="evenodd" clipRule="evenodd" d="M10 6.5a3.5 3.5 0 1 1-7 0 3.5 3.5 0 0 1 7 0m-.691 3.516a4.5 4.5 0 1 1 .707-.707l2.838 2.837a.5.5 0 0 1-.708.708z" fill="#000"/></svg>
+                        <input type="text" placeholder="Search activities..." className="w-full bg-transparent outline-none placeholder:text-muted-foreground" value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)}/>
                     </label>
                     
                     <div className="flex justify-end md:gap-2">
                         <a href="log-activity" className="inline-flex items-center border rounded-lg p-2 bg-slate-700 font-medium text-neutral-100 hover:bg-slate-800 hover:text-neutral-200">Log Activity</a>
-                        <button 
-                            onClick={handleExportCSV}
-                            className="inline-flex items-center border rounded-lg p-2 bg-emerald-700 font-medium text-neutral-100 hover:bg-teal-800 hover:text-neutral-200 transition-colors"
-                        >
+                        <button onClick={handleExportExcel} className="inline-flex items-center border rounded-lg p-2 bg-emerald-700 font-medium text-neutral-100 hover:bg-teal-800 hover:text-neutral-200 transition-colors mr-2">
+                            Export Excel
+                        </button>
+                        <button onClick={handleExportCSV} className="inline-flex items-center border rounded-lg p-2 bg-blue-600 font-medium text-neutral-100 hover:bg-blue-700 hover:text-neutral-200 transition-colors">
                             Export CSV
                         </button>
                     </div>
                 </div>
-                
-                <div className="overflow-x-auto w-full">
-                <table className="w-full text-left border-t min-w-full border-gray-200 space-x-8 space-y-4">
-                <thead>
-                    <tr className="text-gray-500 text-sm">
-                        <th className="py-2"></th>
-                        <th className="py-2">Date</th>
-                        <th className="py-2">Solution Architect</th>
-                        <th className="py-2">Activity</th>
-                        <th className="py-2">Category</th>
-                        <th className="py-2">Location</th>
-                        <th className="py-2">Customer</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {loading ? (
-                        <tr>
-                            <td colSpan="7" className="text-center py-8">
-                                <Loader /> 
-                            </td>
-                        </tr>
-                    ) : filteredActivities.length > 0 ? (
-                        filteredActivities.map((activity, index) => (
-                            <tr key={activity.id} className="border-b border-gray-100 hover:bg-blue-50 transition-colors cursor-pointer"
-                                onClick={() => handleRowClick(activity.id)}
-                                title="Click to view/edit activity details"
-                            >
-                                <td className="py-3 px-2 text-gray-500">{index + 1}</td>
-                                <td className="py-3 px-2">{new Date(activity.date).toLocaleDateString()}</td>
-                                <td className="py-3 px-2 font-medium">{activity.solarch}</td>
-                                <td className="py-3 px-2">{activity.title}</td>
-                                <td className="py-3 px-2">
-                                    <span className={getCategoryBadgeClasses(activity.category?.color)}>
-                                        {activity.category?.category_name}
-                                    </span>
-                                </td>
-                                <td className="py-3 px-2 text-gray-600">{activity.customer?.location}</td>
-                                <td className="py-3 px-2 text-gray-600">{activity.customer?.company_name || "No customer"}</td>
-                            </tr>
-                        ))
-                    ) : (
-                        <tr>
-                            <td colSpan="7" className="text-center py-8 text-gray-500">
-                                {searchTerm ? `No activities found matching "${searchTerm}"` : "No activities found for the selected period."}
-                            </td>
-                        </tr>
+
+                {/* Filter Section */}
+                <div className="flex flex-wrap justify-start gap-4 p-2 border-b border-gray-200">
+                    <SelectField label="Timeframe" name="timeframe" value={filters.timeframe} selectmessage="All time"
+                        options={filterOptions.timeframes}
+                        onChange={(e) => handleFilterChange('timeframe', e.target.value)}/>
+                    <SelectField label="Solutions Architect" name="solarch" value={filters.solarch} selectmessage="All Solutions Architects"
+                        options={filterOptions.solarches}
+                        onChange={(e) => handleFilterChange('solarch', e.target.value)}/>
+                    <SelectField label="Category" name="category" value={filters.category} selectmessage="All Categories" 
+                        options={filterOptions.categories}
+                        onChange={(e) => handleFilterChange('category', e.target.value)}/>
+                    
+                    {/* Clear Filters Button */}
+                    {(filters.timeframe || filters.solarch || filters.category || searchTerm) && (
+                        <div className="flex items-end">
+                            <button onClick={clearFilters}
+                                className="px-3 py-2 text-sm text-gray-600 bg-gray-100 border border-gray-300 rounded hover:bg-gray-200 transition-colors">
+                                Clear Filters
+                            </button>
+                        </div>
                     )}
-                </tbody>
-                </table>
+                </div>
+
+                {/* Filter Summary */}
+                {(filters.timeframe || filters.solarch || filters.category) && (
+                    <div className="p-2 bg-blue-50 border border-blue-200 rounded-lg mt-4">
+                        <div className="flex items-center gap-2">
+                            <svg className="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" /></svg>
+                            <span className="text-sm font-medium text-blue-800">
+                                Showing {filteredActivities.length} of {activities.length} activities
+                            </span>
+                        </div>
+                    </div>
+                )}
+                
+                <div className="overflow-x-auto w-full mt-4">
+                    <table className="w-full text-left border-t min-w-full border-gray-200 space-x-8 space-y-4">
+                        <thead>
+                            <tr className="text-gray-500 text-sm">
+                                <th className="py-3">#</th>
+                                <th className="py-3">Date</th>
+                                <th className="py-3">Solution Architect</th>
+                                <th className="py-3">Activity</th>
+                                <th className="py-3">Category</th>
+                                <th className="py-3">Location</th>
+                                <th className="py-3">Customer</th>
+                                <th className="py-3">Additional Details</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {loading ? (
+                                <tr>
+                                    <td colSpan="8" className="text-center py-8">
+                                        <Loader /> 
+                                    </td>
+                                </tr>
+                            ) : filteredActivities.length > 0 ? (
+                                filteredActivities.map((activity, index) => (
+                                    <tr key={activity.id} className="border-b border-gray-100 hover:bg-blue-50 transition-colors cursor-pointer"
+                                        onClick={() => handleRowClick(activity.id)}
+                                        title="Click to view/edit activity details"
+                                    >
+                                        <td className="py-3 px-2 text-gray-500">{index + 1}</td>
+                                        <td className="py-3 px-2">{new Date(activity.date).toLocaleDateString()}</td>
+                                        <td className="py-3 px-2 font-medium">{activity.solarch}</td>
+                                        <td className="py-3 px-2 max-w-lg">{activity.title} | {activity.description} | {activity.start_time}-{activity.end_time}</td>
+                                        <td className="py-3 px-2 truncate">
+                                            <span className={getCategoryBadgeClasses(activity.category?.color)}>
+                                                {activity.category?.category_name}
+                                            </span>
+                                        </td>
+                                        <td className="py-3 px-2 text-gray-600">{activity.customer?.location}</td>
+                                        <td className="py-3 px-2 text-gray-600">{activity.customer?.company_name || "No customer"}</td>
+                                        <td className="py-3 px-2 text-sm text-gray-500 max-w-xs">
+                                            {activity.meeting_participants && (
+                                                <div className="mb-1">
+                                                    <span className="mb-1 font-medium">Participants:</span> {activity.meeting_participants}
+                                                </div>
+                                            )}
+                                            {activity.technologies_discussed && (
+                                                <div className="mb-1">
+                                                    <span className="mb-1 font-medium">Tech:</span> {activity.technologies_discussed}
+                                                </div>
+                                            )}
+
+                                            {activity.outcomes && (
+                                                <div className="mb-1">
+                                                    <span className="font-medium">Outcomes:</span> {activity.outcomes}
+                                                </div>
+                                            )}
+                                            {activity.action_items && (
+                                                <div className="mb-1">
+                                                    <span className="font-medium">Action Items:</span> {activity.action_items}
+                                                </div>
+                                            )}
+                                            {activity.knowledge_area && (
+                                                <div className="mb-1">
+                                                    <span className="font-medium">Knowledge:</span> {activity.knowledge_area}
+                                                </div>
+                                            )}
+                                            {activity.training_provider && (
+                                                <div className="mb-1">
+                                                    <span className="font-medium">Provider:</span> {activity.training_provider}
+                                                </div>
+                                            )}
+                                            {activity.certifications_earned && (
+                                                <div className="mb-1">
+                                                    <span className="font-medium text-green-600">Cert:</span> {activity.certifications_earned}
+                                                </div>
+                                            )}
+                                        </td>
+                                    </tr>
+                                ))
+                            ) : (
+                                <tr>
+                                    <td colSpan="8" className="text-center py-8 text-gray-500">
+                                        {searchTerm || filters.timeframe || filters.solarch || filters.category 
+                                            ? `No activities found matching the current filters` 
+                                            : "No activities found for the selected period."
+                                        }
+                                    </td>
+                                </tr>
+                            )}
+                        </tbody>
+                    </table>
                 </div>
             </div>
         </>
