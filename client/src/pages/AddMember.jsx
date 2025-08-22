@@ -12,19 +12,21 @@ export default function AddMember() {
         full_name: "",
         contact_number: "",
         title: "",
-        department: ""
+        department: "",
+        is_solarch: false
     });
     const [error, setError] = useState("");
     const [success, setSuccess] = useState("");
     const [loading, setLoading] = useState(false);
 
     const handleInputChange= (e) => {
-        const {name, value} = e.target;
+        const {name, value, type, checked} = e.target;
         setFormData(prev => ({
             ...prev,
-            [name]: value
+            [name]: type === 'checkbox' ? checked : value
         }));
     };
+    
     const handleSubmit = async (e) => {
         e.preventDefault();
         setLoading(true);
@@ -52,7 +54,8 @@ export default function AddMember() {
             email: formData.email,
             contact_number: formData.contact_number,
             title: formData.title,
-            department: formData.department
+            department: formData.department,
+            is_solarch: formData.is_solarch
             });
 
         if (profileError) {
@@ -68,7 +71,8 @@ export default function AddMember() {
             full_name: '',
             contact_number: '',
             title: '',
-            department: ''
+            department: '',
+            is_solarch: false
         });
 
         } catch (err) {
@@ -113,6 +117,22 @@ export default function AddMember() {
                             { value: "Operations", label: "Operations" },
                             { value: "Customer Support", label: "Customer Support" }
                     ]}/>
+                    
+                    {/* Solutions Architect Checkbox */}
+                    <div className="flex items-center space-x-3">
+                        <input
+                            type="checkbox"
+                            id="is_solarch"
+                            name="is_solarch"
+                            checked={formData.is_solarch}
+                            onChange={handleInputChange}
+                            className="w-4 h-4 text-sky-950 bg-gray-100 border-gray-300 rounded focus:ring-sky-950 focus:ring-2"
+                        />
+                        <label htmlFor="is_solarch" className="text-sm font-medium text-gray-700">
+                            Solutions Architect
+                        </label>
+                    </div>
+
                     <button onClick={handleSubmit} disabled={loading}
                         className={`w-full py-2 px-4 rounded-md font-medium text-white ${
                             loading

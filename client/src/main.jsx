@@ -16,6 +16,7 @@ import RequireAuth from './components/RequireAuth.jsx';
 import AddMember from './pages/AddMember.jsx';
 import Profile from './pages/Profile.jsx';
 import Loader from './components/Loader.jsx';
+import Setting from './pages/Setting.jsx';
 
 document.documentElement.setAttribute('data-theme', 'light');// Set default theme
 
@@ -40,6 +41,7 @@ createRoot(document.getElementById('root')).render(
           <Route path="certification" element={<Certification />} />
           <Route path="add-member" element={<AddMember/>} />
           <Route path="profile" element={<Profile />} />
+          <Route path="settings" element={<Setting />} />
           <Route path="loader" element={<Loader />} />
         </Route>
       </Routes>

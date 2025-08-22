@@ -17,7 +17,6 @@ export default function Navbar(){
         { name: "Log Activity", path: "/log-activity" },
         { name: "Schedule", path: "/schedule" },
         { name: "Reports", path: "/report" },
-        { name: "Certification", path: "/certification" },
         { name: "Customer Information", path: "/customer" },
     ];
 

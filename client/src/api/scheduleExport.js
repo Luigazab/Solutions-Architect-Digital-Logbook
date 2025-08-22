@@ -56,11 +56,6 @@ const createWeekWorksheet = (workbook, weekData, activities, solutionArchitects)
   const worksheetName = formatWeekName(weekStart, weekEnd);
   
   const worksheet = workbook.addWorksheet(worksheetName);
-  const logoId = workbook.addImage({
-    filename: '../../public/image.png', // or use buffer/base64
-    extension: 'png'
-    });
-
   
   // Set column widths
   worksheet.getColumn(1).width = 45; // TECHNICAL SUPPORT
@@ -71,9 +66,6 @@ const createWeekWorksheet = (workbook, weekData, activities, solutionArchitects)
   worksheet.getRow(8).height =50;
   worksheet.getRow(9).height =50;
   worksheet.getRow(10).height =50;
-
-  worksheet.addImage(logoId, 'A1:A1'); // Anchors image to cell C3
-
   
   // Header styling
   const headerFill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFFFFFFF' } };

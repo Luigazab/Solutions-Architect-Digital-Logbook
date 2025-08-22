@@ -18,6 +18,26 @@ export const activityService ={
     return { data, error: null };
   },
 
+  fetchSolutionsArchitects: async () => {
+    try {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('id, full_name')
+        .eq('is_solarch', true)
+        .order('full_name', { ascending: true });
+
+      if (error) {
+        console.error("Error fetching solutions architects:", error);
+        return { data: [], error };
+      }
+
+      return { data, error: null };
+    } catch (error) {
+      console.error("Error in fetchSolutionsArchitects:", error);
+      return { data: [], error };
+    }
+  },
+
   async fetchActivityById(id) {
     const { data, error } = await supabase
       .from('activities')

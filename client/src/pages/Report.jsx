@@ -20,6 +20,8 @@ export default function Report(){
     const [loading, setLoading] = useState(true);
     const [customerStats, setCustomerStats] = useState([]);
     const [searchTerm, setSearchTerm] = useState("");
+    const [architectCertStats, setArchitectCertStats] = useState([]);
+
     
     // Filter states
     const [filters, setFilters] = useState({
@@ -55,6 +57,22 @@ export default function Report(){
             
             const customerStatistics = activityService.generateCustomerStats(filtered);
             setCustomerStats(customerStatistics);
+
+             const certCounts = filtered
+            .filter(a => a.category?.category_name === "Technical Training")
+            .reduce((acc, activity) => {
+                const solarch = activity.solarch || "Unknown";
+                acc[solarch] = (acc[solarch] || 0) + 1;
+                return acc;
+            }, {});
+
+        const statsArray = Object.entries(certCounts).map(([solarch, count]) => ({
+            solarch,
+            role: "Solution Architect",
+            value: count
+        }));
+
+        setArchitectCertStats(statsArray);
         }
     }, [activities, filters, searchTerm]);
 
@@ -202,28 +220,34 @@ export default function Report(){
 
     return(
         <>
-            <div className="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-4 gap-4 mb-6">
+            <div className="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-4 gap-4 mb-6 min-h-[380px] md:max-h-[380px]">
                 <SummaryCard title="Total Activities" value={summary.totalActivities} subtitle="Tracked"><span><svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 384 512"><path d="M249.9 66.8c10.4-14.3 7.2-34.3-7.1-44.7s-34.3-7.2-44.7 7.1l-106 145.7-37.5-37.5c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3l64 64c6.6 6.6 15.8 10 25.1 9.3s17.9-5.5 23.4-13.1l128-176zm128 136c10.4-14.3 7.2-34.3-7.1-44.7s-34.3-7.2-44.7 7.1l-170 233.7-69.5-69.5c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3l96 96c6.6 6.6 15.8 10 25.1 9.3s17.9-5.5 23.4-13.1l192-264z"/></svg></span></SummaryCard>
                 <SummaryCard title="Average Activities" value={summary.averageActivities} subtitle="Per month"><svg class="w-5 h-5" viewBox="0 0 52 52" data-name="Layer 1" xmlns="http://www.w3.org/2000/svg"><path d="M39.55 26A10.5 10.5 0 1 0 50 36.5 10.5 10.5 0 0 0 39.55 26m0 16.14a5.65 5.65 0 1 1 5.6-5.64 5.64 5.64 0 0 1-5.6 5.64M23 15.5a10.48 10.48 0 1 0-3.07 7.43A10.5 10.5 0 0 0 23 15.5m-10.5 5.64a5.65 5.65 0 1 1 4-1.65 5.63 5.63 0 0 1-4.01 1.65Zm26.71-15A.8.8 0 0 0 38.49 5h-3a.83.83 0 0 0-.64.4l-22 40.41a.78.78 0 0 0 0 .78.79.79 0 0 0 .68.39h3a.8.8 0 0 0 .64-.4l22-40.41Z"/></svg></SummaryCard>
                 <SummaryCard title="Total Certifications" value={summary.totalCertifications} subtitle="Attained Certification"><svg class="w-5 h-5" viewBox="0 0 15 15" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M9.5 14.5H9a.5.5 0 0 0 .8.4zm2-1.5.3-.4a.5.5 0 0 0-.6 0zm2 1.5-.3.4a.5.5 0 0 0 .8-.4zm-2-3.5A2.5 2.5 0 0 1 9 8.5H8a3.5 3.5 0 0 0 3.5 3.5zM14 8.5a2.5 2.5 0 0 1-2.5 2.5v1A3.5 3.5 0 0 0 15 8.5zM11.5 6A2.5 2.5 0 0 1 14 8.5h1A3.5 3.5 0 0 0 11.5 5zm0-1A3.5 3.5 0 0 0 8 8.5h1A2.5 2.5 0 0 1 11.5 6zM9 10.5v4h1v-4zm.8 4.4 2-1.5-.6-.8-2 1.5zm1.4-1.5 2 1.5.6-.8-2-1.5zm2.8 1.1v-4h-1v4zM15 5V1.5h-1V5zm-1.5-5h-12v1h12zM0 1.5v12h1v-12zM1.5 15H8v-1H1.5zM0 13.5A1.5 1.5 0 0 0 1.5 15v-1a.5.5 0 0 1-.5-.5zM1.5 0A1.5 1.5 0 0 0 0 1.5h1a.5.5 0 0 1 .5-.5zM15 1.5A1.5 1.5 0 0 0 13.5 0v1a.5.5 0 0 1 .5.5zM3 5h5V4H3zm0 3h3V7H3z" fill="#000"/></svg></SummaryCard>
                 
-                <div className="bg-white p-4 rounded-xl sm:col-span-3 md:col-span-1  shadow md:row-span-2">
-                    <div className="flex justify-between items-center">
-                        <div>
-                            <Title>Certifications</Title>
-                            <Description>per Solution Architect</Description>
+                <div className="bg-white p-4 rounded-xl sm:col-span-3 md:col-span-1 shadow md:row-span-2">
+                    <div className="flex flex-col justify-between">
+                        <div className="flex justify-between items-center">
+                            <div>
+                                <Title>Certifications</Title>
+                                <Description>per Solution Architect</Description>
+                            </div>
+                            <span><svg className="w-10 h-10" viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg"><path fill="currentColor" d="M688 264c0-4.4-3.6-8-8-8H296c-4.4 0-8 3.6-8 8v48c0 4.4 3.6 8 8 8h384c4.4 0 8-3.6 8-8zm-8 136H296c-4.4 0-8 3.6-8 8v48c0 4.4 3.6 8 8 8h384c4.4 0 8-3.6 8-8v-48c0-4.4-3.6-8-8-8M480 544H296c-4.4 0-8 3.6-8 8v48c0 4.4 3.6 8 8 8h184c4.4 0 8-3.6 8-8v-48c0-4.4-3.6-8-8-8m-48 308H208V148h560v344c0 4.4 3.6 8 8 8h56c4.4 0 8-3.6 8-8V108c0-17.7-14.3-32-32-32H168c-17.7 0-32 14.3-32 32v784c0 17.7 14.3 32 32 32h264c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8m356.8-74.4c29-26.3 47.2-64.3 47.2-106.6 0-79.5-64.5-144-144-144s-144 64.5-144 144c0 42.3 18.2 80.3 47.2 106.6-57 32.5-96.2 92.7-99.2 162.1-.2 4.5 3.5 8.3 8 8.3h48.1c4.2 0 7.7-3.3 8-7.6C564 871.2 621.7 816 692 816s128 55.2 131.9 124.4c.2 4.2 3.7 7.6 8 7.6H880c4.6 0 8.2-3.8 8-8.3-2.9-69.5-42.2-129.6-99.2-162.1M692 591c44.2 0 80 35.8 80 80s-35.8 80-80 80-80-35.8-80-80 35.8-80 80-80"/></svg></span>
                         </div>
-                        <span><svg className="w-10 h-10" viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg"><path fill="currentColor" d="M688 264c0-4.4-3.6-8-8-8H296c-4.4 0-8 3.6-8 8v48c0 4.4 3.6 8 8 8h384c4.4 0 8-3.6 8-8zm-8 136H296c-4.4 0-8 3.6-8 8v48c0 4.4 3.6 8 8 8h384c4.4 0 8-3.6 8-8v-48c0-4.4-3.6-8-8-8M480 544H296c-4.4 0-8 3.6-8 8v48c0 4.4 3.6 8 8 8h184c4.4 0 8-3.6 8-8v-48c0-4.4-3.6-8-8-8m-48 308H208V148h560v344c0 4.4 3.6 8 8 8h56c4.4 0 8-3.6 8-8V108c0-17.7-14.3-32-32-32H168c-17.7 0-32 14.3-32 32v784c0 17.7 14.3 32 32 32h264c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8m356.8-74.4c29-26.3 47.2-64.3 47.2-106.6 0-79.5-64.5-144-144-144s-144 64.5-144 144c0 42.3 18.2 80.3 47.2 106.6-57 32.5-96.2 92.7-99.2 162.1-.2 4.5 3.5 8.3 8 8.3h48.1c4.2 0 7.7-3.3 8-7.6C564 871.2 621.7 816 692 816s128 55.2 131.9 124.4c.2 4.2 3.7 7.6 8 7.6H880c4.6 0 8.2-3.8 8-8.3-2.9-69.5-42.2-129.6-99.2-162.1M692 591c44.2 0 80 35.8 80 80s-35.8 80-80 80-80-35.8-80-80 35.8-80 80-80"/></svg></span>
-                    </div>
-                    <hr className="mb-4" />
-                    <div className="flex flex-col justify-between gap-4">
-                        {ArchitectCertReport("https://www.macrologic.com.ph/wp-content/uploads/2023/10/luigazab.jpg", "Luigazab", "Solution Architect", "Certified Solution Architect", "2")}
-                        <hr />
-                        {ArchitectCertReport("https://www.macrologic.com.ph/wp-content/uploads/2023/10/luigazab.jpg", "Luigazab", "Solution Architect", "Certified Solution Architect", "2")}
-                        <hr />
-                        {ArchitectCertReport("https://www.macrologic.com.ph/wp-content/uploads/2023/10/luigazab.jpg", "Luigazab", "Solution Architect", "Certified Solution Architect", "2")}
-                        <hr />
-                        <div className="flex justify-end">
+                        <hr className="mb-4" />
+                        <div className="flex-grow space-y-4 overflow-y-auto">
+                            {architectCertStats.length > 0 ? (
+                                architectCertStats.map((stat, idx) => (
+                                    <div key={idx}>
+                                        {ArchitectCertReport(stat.solarch, stat.solarch, stat.role, stat.value)}
+                                        <hr />
+                                    </div>
+                                ))
+                            ) : (
+                                <p className="text-gray-500 text-sm">No Technical Training records yet.</p>
+                            )}
+                        </div>
+                        <div className="flex justify-end mt-4">
                             <a href="certificate.html" className="bg-gray-100 text-sm font-medium text-gray-800 border border-gray-300 px-4 py-2 rounded hover:bg-slate-800 hover:text-neutral-200">View Certificates</a>
                         </div>
                     </div>
@@ -387,7 +411,7 @@ export default function Report(){
                                     >
                                         <td className="py-3 px-2 text-gray-500">{index + 1}</td>
                                         <td className="py-3 px-2">{new Date(activity.date).toLocaleDateString()}</td>
-                                        <td className="py-3 px-2 font-medium">{activity.solarch}</td>
+                                        <td className="py-3 px-2 font-medium truncate">{activity.solarch}</td>
                                         <td className="py-3 px-2 max-w-lg">{activity.title} | {activity.description} | {activity.start_time}-{activity.end_time}</td>
                                         <td className="py-3 px-2 truncate">
                                             <span className={getCategoryBadgeClasses(activity.category?.color)}>
@@ -454,11 +478,10 @@ export default function Report(){
     );
 }
 
-export function ArchitectCertReport(image, altText, name, role, value) {
+export function ArchitectCertReport( altText, name, role, value) {
     return (
         <div className="flex justify-between items-center">
             <div className="flex items-center space-x-2">
-                <img src={image} alt={altText} className="w-5 h-5" />
                 <div>
                     <h4 className="text-slate-900 font-semibold">{name}</h4>
                     <p className="text-sm text-slate-700">{role}</p>

@@ -16,6 +16,7 @@ export default function LogActivity() {
   const [accountManager, setAccountManager] = useState();// state for account manager selection
   const [accountManagers, setAccountManagers] = useState([]);
   const [showModalAccountManager, setShowModalAccountManager] = useState(false);// state for account manager modal visibility
+  const [solutionsArchitects, setSolutionsArchitects] = useState([]); // state for solutions architects
 
   useEffect(() => {
     loadDropdownData();
@@ -23,13 +24,15 @@ export default function LogActivity() {
 
   const loadDropdownData = async () => {
     try {
-      const [customersResult, managersResult] = await Promise.all([
+      const [customersResult, managersResult, solarcsResult] = await Promise.all([
         activityService.fetchCustomers(),
-        activityService.fetchAccountManagers()
+        activityService.fetchAccountManagers(),
+        activityService.fetchSolutionsArchitects()
       ]);
 
       if (!customersResult.error) setCustomers(customersResult.data);
       if (!managersResult.error) setAccountManagers(managersResult.data);
+      if (!solarcsResult.error) setSolutionsArchitects(solarcsResult.data);
     } catch (error) {
       console.error("Error loading dropdown data:", error);
     }
@@ -155,11 +158,10 @@ export default function LogActivity() {
                 ]}
               />
               <SelectField label="Solutions Architect" name="solarch" value={form.solarch} onChange={handleChange} selectmessage={"Select Solutions Architect"}
-                options={[
-                  {value: "reggie", label: "Reggie"},
-                  {value: "klien", label: "Klien"},
-                  {value: "rommel", label: "Rommel"},
-                ]}
+                options={solutionsArchitects.map(solarch => ({ 
+                  value: solarch.user_id, 
+                  label: solarch.full_name 
+                }))}
               />
             </div>
             <TextInput label="Title" name="title" value={form.title} onChange={handleChange} type="text" placeholder="Brief title for this activity" />
