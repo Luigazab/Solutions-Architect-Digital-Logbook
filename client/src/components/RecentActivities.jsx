@@ -2,7 +2,7 @@ import {Title, Subtitle} from "../components/Text";
 import { useState, useEffect } from "react";
 import Loader from "./Loader";
 import { getCategoryBadgeClasses } from "../utils/colors";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { activityService } from "../api/activity";
 
 export default function RecentActivities(){
