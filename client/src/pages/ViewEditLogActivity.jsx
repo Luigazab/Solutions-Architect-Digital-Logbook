@@ -325,6 +325,7 @@ export default function ViewEditActivity() {
                 onChange={handleChange}
                 disabled={!isEditing}
                 selectmessage="Select Activity Category"
+                allowEmpty={false}
                 options={[
                   {value: "client_visit", label: "Client Visit"},
                   {value: "meetings_attended", label: "Meetings Attended"},
@@ -338,18 +339,19 @@ export default function ViewEditActivity() {
                 onChange={handleChange}
                 disabled={!isEditing}
                 selectmessage="Select Solutions Architect"
+                allowEmpty={false}
                 options={solutionsArchitects.map(solarch => ({ 
                   value: solarch.id, 
                   label: solarch.full_name 
                 }))}/>
             </div>
 
-            <TextInput label="Title" name="title" value={form.title} onChange={handleChange} disabled={!isEditing}type="text" placeholder="Brief title for this activity" />
+            <TextInput label="Title" name="title" value={form.title} onChange={handleChange} disabled={!isEditing}type="text" placeholder="Brief title for this activity" required={true}/>
             
             <TextArea label="Description" name="description"  value={form.description} onChange={handleChange}disabled={!isEditing} placeholder="Detailed description of the activity" />
             
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-              <TextInput label="Date" name="date" value={form.date} onChange={handleChange}disabled={!isEditing}type="date" />
+              <TextInput label="Date" name="date" value={form.date} onChange={handleChange}disabled={!isEditing}type="date" required={true}/>
               <TextInput label="Start Time" name="startTime" value={form.startTime} type="time" onChange={handleChange}disabled={!isEditing}/>
               <TextInput label="End Time" name="endTime" value={form.endTime} onChange={handleChange}disabled={!isEditing}type="time" />
             </div>

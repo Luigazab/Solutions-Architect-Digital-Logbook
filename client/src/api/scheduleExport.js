@@ -221,13 +221,29 @@ const createWeekWorksheet = (workbook, weekData, activities, solutionArchitects)
       scheduleCell.font = {color: { argb: 'FF000000' }, bold: true, size: 16 };
       scheduleCell.alignment = { horizontal: 'center', vertical: 'middle' };
       scheduleCell.border = thinBorder;
+
+      const formatTimeRange = (activity) => {
+        if (activity.start_time && activity.end_time) {
+          return `${activity.start_time}-${activity.end_time}`;
+        } else if (activity.start_time) {
+          return `${activity.start_time}`;
+        } else if (activity.end_time) {
+          return `Until ${activity.end_time}`;
+        }
+        return ''; // Return empty string for all-day events
+      };
       
       // Add activities for each day
       weekDates.forEach((date, dayIndex) => {
         const dateKey = formatDate(date);
         const dayActivities = activities.filter(activity => 
           activity.user_profile?.full_name === solarch && formatDate(new Date(activity.date)) === dateKey
-        ).sort((a, b) => a.start_time.localeCompare(b.start_time));
+        ).sort((a, b) => {
+          // Safe sorting - handle missing start_time
+          const aTime = a.start_time || '00:00';
+          const bTime = b.start_time || '00:00';
+          return aTime.localeCompare(bTime);
+        });
         
         const cell = row.getCell(3 + dayIndex);
         cell.fill = scheduleFill;
@@ -242,7 +258,10 @@ const createWeekWorksheet = (workbook, weekData, activities, solutionArchitects)
           const activityText = rowActivities.map(activity => {
             const categoryText = activity.category?.category_name ? 
               ` [${activity.category.category_name}]` : '';
-            return `${activity.start_time}-${activity.end_time}: ${activity.title} ${activity.description ? ' ' + activity.description : ''} ${activity.customer?.company_name} ${categoryText}`;
+            const timeRange = formatTimeRange(activity);
+            const timePrefix = timeRange ? `${timeRange}: ` : '';
+            
+            return `${timePrefix}${activity.title || 'Untitled'} ${activity.description ? ' ' + activity.description : ''} ${activity.customer?.company_name || ''} ${categoryText}`.trim();
           }).join('\n');
           
           cell.value = activityText;

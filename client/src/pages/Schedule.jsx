@@ -169,19 +169,32 @@ function CalendarGrid({ days, today, onSelect, selectedDate }) {
 
 // Activity Item Component
 function ActivityItem({ activity, onClick }) {
+
+  const displayTime = (time) => time || '';
+
+  const getTimeDisplay= () => {
+    if(activity.start_time && activity.end_time){
+      return `${activity.start_time} - ${activity.end_time}`;
+    }else if(activity.start_time){
+      return `${activity.start_time}`;
+    }else if(activity.end_time){
+      return `Until ${activity.end_time}`
+    }
+    return 'All day';
+  };
   
   return (
     <li className="border p-3 rounded-md shadow-sm hover:shadow-md hover:bg-blue-50 transition-shadow cursor-pointer" onClick={onClick} >
       <div className="flex justify-between items-center mb-2">
         <span className="text-sm text-gray-600">
-          {activity.start_time} – {activity.end_time}
+          {getTimeDisplay()}
         </span>
         <span className={`${getCategoryBadgeClasses(activity.category?.color)} truncate`}>
-          {activity.category?.category_name}
+          {activity.category?.category_name || ''}
         </span>
       </div>
-      <p className="font-medium text-gray-900">{activity.title}</p>
-      <p className="text-xs text-gray-500 mt-1">Solution Architect: {activity.user_profile?.full_name}</p>
+      <p className="font-medium text-gray-900">{activity.title || 'Untitled Activity'}</p>
+      <p className="text-xs text-gray-500 mt-1">Solution Architect: {activity.user_profile?.full_name || 'Unassigned'}</p>
     </li>
   );
 }
@@ -343,7 +356,12 @@ export default function ActivityCalendar() {
       );
       
       if (cachedActivities.length > 0 || allActivities.length > 0) {
-        setActivities(cachedActivities.sort((a, b) => a.start_time.localeCompare(b.start_time)));
+        setActivities(
+          cachedActivities
+            .filter(activity => activity.start_time) // Remove activities without start_time
+            .sort((a, b) => a.start_time.localeCompare(b.start_time))
+            .concat(cachedActivities.filter(activity => !activity.start_time)) // Add activities without start_time at the end
+        );
       } else {
         // Fallback to direct query if no cached data
         const { data, error } = await supabase
