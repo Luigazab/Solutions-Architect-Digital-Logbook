@@ -3,7 +3,7 @@ export function Title({ children }) {
 }
 
 export function Subtitle({ children }) {
-  return <h2 className="text-sm text-gray-500 mb-4">{children}</h2>;
+  return <h2 className="text-sm text-gray-500 mb-2">{children}</h2>;
 }
 
 export function Description({ children }) {

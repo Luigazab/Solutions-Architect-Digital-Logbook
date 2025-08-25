@@ -17,10 +17,21 @@ export default function LogActivity() {
   const [accountManagers, setAccountManagers] = useState([]);
   const [showModalAccountManager, setShowModalAccountManager] = useState(false);// state for account manager modal visibility
   const [solutionsArchitects, setSolutionsArchitects] = useState([]); // state for solutions architects
+  const [currentUser, setCurrentUser] = useState(null); // state for current logged-in user
 
   useEffect(() => {
     loadDropdownData();
+    getCurrentUser();
   }, []);
+
+  const getCurrentUser = async () => {
+    try{
+      const user = await activityService.getCurrentUser();
+      setCurrentUser(user);
+    } catch (error) {
+      console.error("Error getting current user:", error);
+    }
+  };
 
   const loadDropdownData = async () => {
     try {
@@ -77,9 +88,22 @@ export default function LogActivity() {
   
   async function handleSubmit(e) {
     e.preventDefault();
+
+    if(!currentUser) {
+      alert("Error: User not authenticated");
+      return;
+    }
+
+    const selectedSolarch = solutionsArchitects.find(sa => sa.id === form.solarch);
+
+    if(!selectedSolarch){
+      alert("Please select a Solutions Architect");
+      return;
+    }
+
     const payload = {
       category: form.category,
-      solarch: form.solarch,
+      user: selectedSolarch.user_id,
       title: form.title,
       description: form.description,
       date: form.date,
@@ -96,6 +120,8 @@ export default function LogActivity() {
       knowledge_area: form.knowledgeArea,
       training_provider: form.trainingProvider,
       certifications_earned: form.certificationsEarned,
+      added_by: currentUser.id,
+      updated_by: currentUser.id,
     };
     
     const { error } = await activityService.insertActivity(payload);
@@ -159,7 +185,7 @@ export default function LogActivity() {
               />
               <SelectField label="Solutions Architect" name="solarch" value={form.solarch} onChange={handleChange} selectmessage={"Select Solutions Architect"}
                 options={solutionsArchitects.map(solarch => ({ 
-                  value: solarch.user_id, 
+                  value: solarch.id, 
                   label: solarch.full_name 
                 }))}
               />

@@ -17,12 +17,15 @@ export default function ViewEditActivity() {
   const [isEditing, setIsEditing] = useState(false);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [deleting, setDeleting] = useState(false);
   
   // State for dropdowns
   const [customers, setCustomers] = useState([]);
   const [accountManagers, setAccountManagers] = useState([]);
   const [showModalCustomer, setShowModalCustomer] = useState(false);
   const [showModalAccountManager, setShowModalAccountManager] = useState(false);
+  const [currentUser, setCurrentUser] = useState(null);
+  const [solutionsArchitects, setSolutionsArchitects] = useState([]);
 
   const [originalActivity, setOriginalActivity] = useState(null);
   const [form, setForm] = useState({
@@ -50,8 +53,18 @@ export default function ViewEditActivity() {
     if (activityId) {
       loadActivity();
       loadDropdownData();
+      getCurrentUser();
     }
   }, [activityId]);
+
+  const getCurrentUser = async () => {
+    try {
+      const user = await activityService.getCurrentUser();
+      setCurrentUser(user);
+    } catch (error) {
+      console.error("Error getting current user:", error);
+    }
+  };
 
   const loadActivity = async () => {
     try {
@@ -69,7 +82,7 @@ export default function ViewEditActivity() {
       // Map database fields to form fields
       const formData = {
         category: activity.category?.id || "",
-        solarch: activity.solarch || "",
+        solarch: activity.user_profile?.id || "",
         title: activity.title || "",
         description: activity.description || "",
         date: activity.date || "",
@@ -100,13 +113,15 @@ export default function ViewEditActivity() {
 
   const loadDropdownData = async () => {
     try {
-      const [customersResult, managersResult] = await Promise.all([
+      const [customersResult, managersResult, solarcsResult] = await Promise.all([
         activityService.fetchCustomers(),
-        activityService.fetchAccountManagers()
+        activityService.fetchAccountManagers(),
+        activityService.fetchSolutionsArchitects()
       ]);
 
       if (!customersResult.error) setCustomers(customersResult.data);
       if (!managersResult.error) setAccountManagers(managersResult.data);
+      if (!solarcsResult.error) setSolutionsArchitects(solarcsResult.data);
     } catch (error) {
       console.error("Error loading dropdown data:", error);
     }
@@ -120,10 +135,18 @@ export default function ViewEditActivity() {
     e.preventDefault();
     try {
       setSaving(true);
+      if (!currentUser) {
+        alert("Error: User not authenticated");
+        return;
+      }
+
+      // Find the selected solutions architect to get their user_id
+      const selectedSolarch = solutionsArchitects.find(sa => sa.id === form.solarch);
+      
       
       const payload = {
         category: form.category,
-        solarch: form.solarch,
+        user: selectedSolarch?.user_id,
         title: form.title,
         description: form.description,
         date: form.date,
@@ -140,6 +163,8 @@ export default function ViewEditActivity() {
         knowledge_area: form.knowledgeArea,
         training_provider: form.trainingProvider,
         certifications_earned: form.certificationsEarned,
+        updated_by: currentUser.id,
+        updated_at: new Date().toISOString()
       };
 
       const { error } = await activityService.updateActivity(activityId, payload);
@@ -164,7 +189,7 @@ export default function ViewEditActivity() {
       // Reset form to original values
       const formData = {
         category: originalActivity.category?.id || "",
-        solarch: originalActivity.solarch || "",
+        solarch: originalActivity.user_profile?.id || "",
         title: originalActivity.title || "",
         description: originalActivity.description || "",
         date: originalActivity.date || "",
@@ -185,6 +210,30 @@ export default function ViewEditActivity() {
       setForm(formData);
     }
     setIsEditing(false);
+  };
+  const handleDelete = async () => {
+    const isConfirmed = window.confirm(
+      "Are you sure you want to delete this activity? This action cannot be undone."
+    );
+    
+    if (!isConfirmed) return;
+
+    try {
+      setDeleting(true);
+      const { error } = await activityService.deleteActivity(activityId);
+      
+      if (error) {
+        alert("Error deleting activity: " + error.message);
+      } else {
+        alert("Activity deleted successfully!");
+        navigate('/');
+      }
+    } catch (error) {
+      console.error("Error deleting activity:", error);
+      alert("Error deleting activity: " + error.message);
+    } finally {
+      setDeleting(false);
+    }
   };
 
   const handleAccountManagerModalClose = () => {
@@ -234,10 +283,10 @@ export default function ViewEditActivity() {
     <>
       <div className="max-w-2xl mx-auto p-2 space-y-4">
         <button 
-          onClick={() => navigate('/')} 
+          onClick={() => window.history.back()}
           className="text-md text-neutral-800 hover:font-semibold"
         >
-          &larr; Back to Dashboard
+          &larr; Return
         </button>
         
         <div className="bg-white p-6 rounded-xl shadow-2xl">
@@ -251,13 +300,13 @@ export default function ViewEditActivity() {
             <div className="flex gap-2">
               {!isEditing ? (
                 <button onClick={() => setIsEditing(true)}
-                  className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition-colors">
+                  className="border rounded-lg px-4 py-2 bg-slate-700 font-medium text-neutral-100 hover:bg-slate-800 hover:text-amber-200 transition-colors">
                   Edit
                 </button>
               ) : (
                 <div className="flex gap-2">
                   <button onClick={handleSave} disabled={saving}
-                    className="bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700 transition-colors disabled:opacity-50">
+                    className="border rounded-lg py-2 px-4 bg-emerald-700 font-medium text-neutral-100 hover:bg-teal-800 hover:text-neutral-200 transition-colors">
                     {saving ? 'Saving...' : 'Save'}
                   </button>
                   <button onClick={handleCancel} disabled={saving}
@@ -271,9 +320,7 @@ export default function ViewEditActivity() {
 
           <form className="space-y-6" onSubmit={handleSave}>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <SelectField 
-                label="Activity Category"
-                name="category"
+              <SelectField label="Activity Category" name="category"
                 value={form.category}
                 onChange={handleChange}
                 disabled={!isEditing}
@@ -285,21 +332,16 @@ export default function ViewEditActivity() {
                   {value: "attended_event", label: "Attended Event"},
                   {value: "technical_training", label: "Technical Training"},
                   {value: "knowledge_transfer", label: "Knowledge Transfer"},
-                ]}
-              />
-              <SelectField 
-                label="Solutions Architect" 
-                name="solarch" 
+                ]}/>
+              <SelectField label="Solutions Architect" name="solarch" 
                 value={form.solarch} 
                 onChange={handleChange}
                 disabled={!isEditing}
                 selectmessage="Select Solutions Architect"
-                options={[
-                  {value: "reggie", label: "Reggie"},
-                  {value: "klien", label: "Klien"},
-                  {value: "rommel", label: "Rommel"},
-                ]}
-              />
+                options={solutionsArchitects.map(solarch => ({ 
+                  value: solarch.id, 
+                  label: solarch.full_name 
+                }))}/>
             </div>
 
             <TextInput label="Title" name="title" value={form.title} onChange={handleChange} disabled={!isEditing}type="text" placeholder="Brief title for this activity" />
@@ -313,9 +355,7 @@ export default function ViewEditActivity() {
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <SelectField 
-                label="Mode" 
-                value={form.mode} 
+              <SelectField label="Mode" value={form.mode} 
                 onChange={handleChange} 
                 name="mode"
                 disabled={!isEditing}
@@ -323,10 +363,8 @@ export default function ViewEditActivity() {
                 options={[
                   {value: "virtual", label: "Virtual"},
                   {value: "onsite", label: "Onsite"},
-                ]}
-              />
-              <SelectField 
-                label="Participants" 
+                ]}/>
+              <SelectField label="Participants" 
                 value={form.participants} 
                 onChange={handleChange} 
                 name="participants"
@@ -335,8 +373,7 @@ export default function ViewEditActivity() {
                 options={[
                   {value: "internal", label: "Internal"},
                   {value: "external", label: "External"},
-                ]}
-              />
+                ]}/>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -401,7 +438,7 @@ export default function ViewEditActivity() {
 
             {/* Display-only info when not editing */}
             {!isEditing && (
-              <div className="bg-gray-50 p-4 rounded-lg">
+              <div className="bg-gray-100 p-4 rounded-lg">
                 <h4 className="font-semibold text-gray-900 mb-2">Activity Information</h4>
                 <div className="grid grid-cols-2 gap-4 text-sm">
                   <div>
@@ -412,7 +449,22 @@ export default function ViewEditActivity() {
                     <span className="text-gray-600">Last Modified:</span>
                     <div className="font-medium">{originalActivity.updated_at ? new Date(originalActivity.updated_at).toLocaleString() : 'N/A'}</div>
                   </div>
+                  <div>
+                    <span className="text-gray-600">Created by:</span>
+                    <div className="font-medium">{originalActivity.added_by_profile?.full_name || 'N/A'}</div>
+                  </div>
+                  <div>
+                    <span className="text-gray-600">Last Modified by:</span>
+                    <div className="font-medium">{originalActivity.updated_by_profile?.full_name || 'N/A'}</div>
+                  </div>
                 </div>
+              </div>
+            )}
+            {!isEditing && (
+              <div className="mt-6 pt-4 border-t border-gray-200 flex justify-end">
+                <button onClick={handleDelete} disabled={deleting} className="bg-red-700 text-white px-4 py-2 rounded-md hover:bg-red-800 transition-colors disabled:opacity-50 flex items-center gap-2">
+                  {deleting ? (<>Deleting...</>) : (<>Delete Activity</>)}
+                </button>
               </div>
             )}
           </form>

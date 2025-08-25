@@ -67,8 +67,11 @@ export default function Home() {
         </SummaryCard>
       </div>
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <div className="bg-white p-6 rounded-xl shadow">
-          <QuickActions />
+        <div>
+          <div className="bg-white p-6 rounded-xl shadow sticky top-12">
+            <QuickActions />
+          </div>
+
         </div>
         <div className="bg-white p-6 rounded-xl shadow">
           <RecentActivities />

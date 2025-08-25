@@ -5,21 +5,21 @@ import { supabase } from "../../supabaseClient";
 
 export default function ModalAccountManager({ isOpen, onClose }) {
   const[name, setName] = useState("");
-  const[department, setDepartment ] = useState("");
-  const[branch, setBranch] = useState("");
+  const[position, setPosition ] = useState("");
+  const[department, setDepartment] = useState("");
   const[loading, setLoading] = useState(false);
 
   async function handleSubmit(e){
     e.preventDefault();
     setLoading(true);
     const { data: { user } } = await supabase.auth.getUser();
-    const { error } = await supabase .from("account_managers") .insert([{name, department, branch, added_by: user?.id, updated_by: user?.id }]);
+    const { error } = await supabase .from("account_managers") .insert([{name, position, department, added_by: user?.id, updated_by: user?.id }]);
     setLoading(false);;
     if (!error) {
       onClose();
       setName("");
+      setPosition("");
       setDepartment("");
-      setBranch("");
     } else {
       alert(error.message);
     }
@@ -29,8 +29,8 @@ export default function ModalAccountManager({ isOpen, onClose }) {
     <Modal isOpen={isOpen} onClose={onClose} title="Add a new account manager">
       <form className="space-y-4" onSubmit={handleSubmit}>
         <TextInput label="Account Manager Name" placeholder="Account manager name" value={name} onChange={e => setName(e.target.value)}  />
-        <TextInput label="Department" placeholder="e.g., TSD, SFD, FAD, HRD" value={department} onChange={e => setDepartment(e.target.value)} />
-        <TextInput label="Branch" placeholder="e.g., Cavite, Cebu, Clark" value={branch} onChange={e => setBranch(e.target.value)} />
+        <TextInput label="Position" placeholder="e.g., Manager, Team Lead" value={position} onChange={e => setPosition(e.target.value)} />
+        <TextInput label="Department" placeholder="e.g., Sales Force, Technical" value={department} onChange={e => setDepartment(e.target.value)} />
 
         <div className="flex justify-end gap-2 mt-4">
           <button type="button" onClick={onClose} className="px-4 py-2 bg-gray-300 rounded">Cancel</button>

@@ -1,6 +1,6 @@
 "use client";
 import { useState, useEffect, useCallback } from "react";
-import { supabase } from "../supabaseClient";
+import { activityService } from "../api/activity";
 import { getCategoryBadgeClasses } from '../utils/colors';
 import { useNavigate } from "react-router-dom";
 import { exportMonthlyScheduleToExcel } from "../api/scheduleExport";
@@ -124,16 +124,14 @@ function CalendarDay({ day, isToday, activities, onSelect, isCurrentMonth, isSel
           : isToday 
             ? "border-2 border-amber-500 bg-amber-50" 
             : "hover:bg-gray-100"
-      } ${!isCurrentMonth ? "text-gray-300 bg-gray-50" : ""}`}
-    >
+      } ${!isCurrentMonth ? "text-gray-300 bg-gray-50" : ""}`}>
       {/* Displays the date */}
       <div className={`text-sm ${
         isSelected 
           ? "font-bold text-indigo-700" 
           : isToday 
             ? "font-bold text-amber-600" 
-            : ""
-      }`}>
+            : "" }`}>
         {day.date.getDate()}
       </div>
       {/* Shows how many activities there are in a day, if its only 1 it displays "activity". But if its more than 1, it displays activities.  */}
@@ -162,15 +160,7 @@ function CalendarGrid({ days, today, onSelect, selectedDate }) {
 
       <div className="grid grid-cols-7 gap-2 text-sm">
         {days.map((day, idx) => (
-          <CalendarDay
-            key={idx}
-            day={day}
-            activities={day.activities}
-            isCurrentMonth={day.isCurrentMonth}
-            isToday={isSameDay(today, day.date)}
-            isSelected={selectedDate && isSameDay(selectedDate, day.date)}
-            onSelect={onSelect}
-          />
+          <CalendarDay key={idx} day={day} activities={day.activities} isCurrentMonth={day.isCurrentMonth} isToday={isSameDay(today, day.date)} isSelected={selectedDate && isSameDay(selectedDate, day.date)} onSelect={onSelect} />
         ))}
       </div>
     </div>
@@ -186,14 +176,12 @@ function ActivityItem({ activity, onClick }) {
         <span className="text-sm text-gray-600">
           {activity.start_time} – {activity.end_time}
         </span>
-        <span
-          className={getCategoryBadgeClasses(activity.categories?.color)}
-        >
-          {activity.categories?.category_name}
+        <span className={`${getCategoryBadgeClasses(activity.category?.color)} truncate`}>
+          {activity.category?.category_name}
         </span>
       </div>
       <p className="font-medium text-gray-900">{activity.title}</p>
-      <p className="text-xs text-gray-500 mt-1">Solution Architect: {activity.solarch}</p>
+      <p className="text-xs text-gray-500 mt-1">Solution Architect: {activity.user_profile?.full_name}</p>
     </li>
   );
 }
@@ -217,11 +205,8 @@ function RightPanel({ activities, selectedDate, loading, error, onRetry, onExpor
     <div className="bg-white border rounded-lg p-6 text-gray-700">
       {/* Export Excel Button */}
       <div className="mb-4 flex justify-end">
-        <button
-          onClick={onExportExcel}
-          disabled={exportingExcel}
-          className="inline-flex items-center px-4 py-2 bg-emerald-700 text-white text-sm font-medium rounded-md hover:scale-101 hover:bg-emerald-800 hover:shadow disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-        >
+        <button onClick={onExportExcel} disabled={exportingExcel}
+          className="inline-flex items-center px-4 py-2 bg-emerald-700 text-white text-sm font-medium rounded-md hover:scale-101 hover:bg-emerald-800 hover:shadow disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
           {exportingExcel ? (
             <>
               <LoadingSpinner size="sm" />
@@ -245,10 +230,7 @@ function RightPanel({ activities, selectedDate, loading, error, onRetry, onExpor
         <div>
           <h2 className="text-lg font-semibold mb-4 text-gray-900">
             Activities on {selectedDate.toLocaleDateString('en-US', { 
-              weekday: 'long',
-              year: 'numeric',
-              month: 'long',
-              day: 'numeric'
+              weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'
             })}
           </h2>
           
@@ -259,9 +241,7 @@ function RightPanel({ activities, selectedDate, loading, error, onRetry, onExpor
             </div>
           ) : activities.length === 0 ? (
             <div className="text-center py-8">
-              <svg className="h-12 w-12 mx-auto text-gray-300 mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
+              <svg className="h-12 w-12 mx-auto text-gray-300 mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
               <p className="text-gray-500">No activities scheduled</p>
               <a href="log-activity" className="inline-flex items-center border rounded-lg p-2 bg-slate-700 font-medium text-neutral-100 hover:bg-slate-800 hover:text-neutral-200">Log Activity</a>
             </div>
@@ -289,10 +269,8 @@ export default function ActivityCalendar() {
   const [dayLoading, setDayLoading] = useState(false);
   const [error, setError] = useState(null);
   const [dayError, setDayError] = useState(null);
-  // Add this to your ActivityCalendar component state declarations:
   const [exportingExcel, setExportingExcel] = useState(false);
 
-  // Add this export handler function in your ActivityCalendar component:
   const handleExportExcel = async () => {
     setExportingExcel(true);
     try {
@@ -303,7 +281,6 @@ export default function ActivityCalendar() {
       );
     } catch (error) {
       console.error('Export failed:', error);
-      // You might want to show an error message to the user
       alert(`Export failed: ${error.message}`);
     } finally {
       setExportingExcel(false);
@@ -316,18 +293,27 @@ export default function ActivityCalendar() {
     setError(null);
     
     try {
-      const startOfMonth = new Date(targetMonth.getFullYear(), targetMonth.getMonth(), 1);
-      const endOfMonth = new Date(targetMonth.getFullYear(), targetMonth.getMonth() + 1, 0);
 
-      const { data, error } = await supabase
-        .from("activities")
-        .select("id, title, solarch, date, start_time, end_time, categories ( category_name, color )")
-        .gte("date", formatDate(startOfMonth))
-        .lte("date", formatDate(endOfMonth));
+      const year = targetMonth.getFullYear();
+      const monthIndex = targetMonth.getMonth();
 
-      if (error) throw error;
+      const firstDay = new Date(year, monthIndex, 1);
+      const startDate = new Date(firstDay);
+      startDate.setDate(startDate.getDate() - startDate.getDay());
 
-      setAllActivities(data || []);
+      const endDate = new Date(startDate);
+      endDate.setDate(endDate.getDate() * 41);
+
+      const { data, error } = await activityService.fetchActivitiesByDateRange(
+        formatDate(startDate),
+        formatDate(endDate)
+      );
+
+      if (error) {
+        throw new Error(error);
+      }
+
+      setAllActivities(data);
       setCalendarData(generateCalendarGrid(targetMonth, data || []));
     } catch (err) {
       console.error("Error fetching month data:", err);
@@ -362,13 +348,13 @@ export default function ActivityCalendar() {
         // Fallback to direct query if no cached data
         const { data, error } = await supabase
           .from("activities")
-          .select("id, title, solarch, date, start_time, end_time, categories ( category_name, color )")
+          .select("id, title, user, date, start_time, end_time, categories ( category_name, color )")
           .gte("date", dateKey)
           .lte("date", dateKey)
           .order("start_time");
 
         if (error) throw error;
-        setActivities(data || []);
+        setActivities(data);
       }
     } catch (err) {
       console.error("Error fetching day activities:", err);
@@ -413,32 +399,12 @@ export default function ActivityCalendar() {
   }
 
   return (
-    <main className="p-6 grid grid-cols-1 lg:grid-cols-[2fr_1fr] gap-6 min-h-screen">
+    <div className="p-2 md:p-6 grid grid-cols-1 lg:grid-cols-[2fr_1fr] gap-6">
       <div className="bg-white border rounded-lg p-6 shadow-sm">
-        <CalendarNav
-          currentMonth={month.toLocaleString("default", { month: "long", year: "numeric" })}
-          onPrev={() => navigateMonth('prev')}
-          onToday={() => navigateMonth('today')}
-          onNext={() => navigateMonth('next')}
-          loading={loading}
-        />
-        <CalendarGrid 
-          days={calendarData} 
-          today={new Date()} 
-          onSelect={fetchDayActivities}
-          selectedDate={selectedDate}
-        />
+        <CalendarNav currentMonth={month.toLocaleString("default", { month: "long", year: "numeric" })} onPrev={() => navigateMonth('prev')} onToday={() => navigateMonth('today')} onNext={() => navigateMonth('next')} loading={loading}/>
+        <CalendarGrid days={calendarData} today={new Date()} onSelect={fetchDayActivities} selectedDate={selectedDate}/>
       </div>
-
-      <RightPanel 
-        activities={activities} 
-        selectedDate={selectedDate}
-        loading={dayLoading}
-        error={dayError}
-        onRetry={handleRetryDay}
-        onExportExcel={handleExportExcel}
-        exportingExcel={exportingExcel}
-      />
-    </main>
+      <RightPanel activities={activities} selectedDate={selectedDate} loading={dayLoading} error={dayError} onRetry={handleRetryDay} onExportExcel={handleExportExcel} exportingExcel={exportingExcel} />
+    </div>
   );
 }

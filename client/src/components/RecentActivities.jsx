@@ -1,9 +1,9 @@
 import {Title, Subtitle} from "../components/Text";
-import { supabase } from "../supabaseClient";
 import { useState, useEffect } from "react";
 import Loader from "./Loader";
 import { getCategoryBadgeClasses } from "../utils/colors";
 import { useNavigate } from "react-router-dom";
+import { activityService } from "../api/activity";
 
 export default function RecentActivities(){
     const [activities, setActivities] = useState([]);
@@ -11,14 +11,15 @@ export default function RecentActivities(){
     const navigate = useNavigate();
     useEffect(() => {
         const fetchActivities = async () => {
-            setLoading(true);
             try {
-                const { data, error } = await supabase
-                    .from('activities')
-                    .select(`*, category:categories (category_name, color)`)
-                    .order('created_at', { ascending: false })
-                    .limit(5);
-                if (error) throw error;
+                setLoading(true);
+                const { data, error } = await activityService.fetchActivities();
+
+                if (error) {
+                    console.error("Error fetching activities:", error);
+                    setLoading(false);
+                    return;
+                }
                 setActivities(data);
             } catch (err) {
                 console.error("Error fetching activities:", err);
@@ -28,6 +29,8 @@ export default function RecentActivities(){
         }
         fetchActivities();
     }, []);
+
+
     const handleActivityClick = (activityId) => {
         navigate(`/view-edit-activity?id=${activityId}`);
     };
@@ -36,17 +39,17 @@ export default function RecentActivities(){
         <>
             <Title>Recent Activities</Title>
             <Subtitle>Latest logged activities</Subtitle>
-            <div className="space-y-4 overflow-auto md:max-h-44">
+            <div className="space-y-4">
                 {loading ? (
                     <Loader/>
-                ) : activities.map((activity, index) => (
+                ) : activities.slice(0,5).map((activity, index) => (
                     <ActivitiesContent 
                         key={index}
                         onClick={() => handleActivityClick(activity.id)}
                         activityName={activity.title}
-                        solArch={activity.solarch}
+                        solArch={activity.user_profile?.full_name}
                         activityDate={new Date(activity.created_at).toLocaleDateString()}
-                        activityTime={new Date(activity.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                        activityTime={`${activity.start_time} - ${activity.end_time}`} 
                         activityMode={activity.mode}
                         badge={activity.category.category_name}
                         badgeColor={getCategoryBadgeClasses(activity.category.color)}
@@ -73,7 +76,7 @@ export function ActivitiesContent({onClick, activityName, solArch, activityDate,
                         <span>{activityMode}</span>
                     </p>
                 </div>
-                <span><span className={badgeColor}>{badge}</span></span>
+                <span><span className={`${badgeColor} truncate`}>{badge}</span></span>
             </div>
         </div>
     );

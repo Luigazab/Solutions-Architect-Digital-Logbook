@@ -84,10 +84,10 @@ export const excelExportService = {
    */
   _groupBySolutionArchitect: (data) => {
     return data.reduce((acc, activity) => {
-      if (!acc[activity.solarch]) {
-        acc[activity.solarch] = [];
+      if (!acc[activity.user_profile?.full_name]) {
+        acc[activity.user_profile?.full_name] = [];
       }
-      acc[activity.solarch].push(activity);
+      acc[activity.user_profile?.full_name].push(activity);
       return acc;
     }, {});
   },
@@ -678,7 +678,7 @@ export const excelExportService = {
 
       const values = [
         new Date(activity.date).toLocaleDateString(),
-        activity.solarch,
+        activity.user_profile?.full_name,
         activityDescription,
         activity.category?.category_name || '',
         activity.customer?.company_name || 'No customer',

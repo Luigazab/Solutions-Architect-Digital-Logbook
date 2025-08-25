@@ -1,101 +1,79 @@
 "use client";
 import { useEffect, useState } from "react";
 import SummaryCard from "../components/SummaryCard";
-import { Title, Subtitle, Description } from "../components/Text";
+import { Title, Subtitle } from "../components/Text";
 import ModalCustomer from "../components/modals/ModalCustomer";
-import { supabase } from "../supabaseClient";
+import ModalAccountManager from "../components/modals/ModalAccountManager";
 import Loader from "../components/Loader";
+import { customerService } from "../api/customerService";
+import { activityService } from "../api/activity";
 
-const exportToCSV = (data, filename) => {
-  if (!data.length) return;
-  const csvRows = [];
-
-  // Headers
-  const headers = Object.keys(data[0]);
-  csvRows.push(headers.join(","));
-
-  // Rows
-  for (const row of data) {
-    const values = headers.map(h => `"${row[h] ?? ""}"`);
-    csvRows.push(values.join(","));
-  }
-
-  // Download
-  const blob = new Blob([csvRows.join("\n")], { type: "text/csv" });
-  const url = window.URL.createObjectURL(blob);
-  const a = document.createElement("a");
-  a.setAttribute("hidden", "");
-  a.setAttribute("href", url);
-  a.setAttribute("download", filename);
-  document.body.appendChild(a);
-  a.click();
-  document.body.removeChild(a);
-};
-
-export default function Customer(){
+export default function Customer() {
     const [customers, setCustomers] = useState([]);
-    const [showModalCustomer, setShowModalCustomer] = useState(false);  
+    const [accountManagers, setAccountManagers] = useState([]);
     const [filteredCustomers, setFilteredCustomers] = useState([]);
     const [searchTerm, setSearchTerm] = useState("");
-    const [summary, setSummary] = useState({
-        totalCustomers: 0,
-        totalIndustries: 0,
-        topIndustry: { name: "", count: 0 },
-    }); 
+    const [summary, setSummary] = useState({ totalCustomers: 0, totalIndustries: 0, topIndustry: { name: "", count: 0 } });
     const [loading, setLoading] = useState(true);
+    const [showModalCustomer, setShowModalCustomer] = useState(false);
+    const [showModalAccountManager, setShowModalAccountManager] = useState(false);
+    const [editingCustomer, setEditingCustomer] = useState(null);
+
     const fetchCustomers = async () => {
-        setLoading(true);
-        const { data, error } = await supabase
-            .from("customers")
-            .select("id, created_at, company_name, industry, location, contact_person, email, contact_number")
-            .order("created_at", { ascending: false });
-        if (error) {
+        try {
+            setLoading(true);
+            const data = await customerService.fetchCustomers();
+            setCustomers(data);
+            setFilteredCustomers(data);
+            setSummary(customerService.calculateSummary(data));
+        } catch (error) {
             console.error("Error fetching customers:", error);
-            return;
+        } finally {
+            setLoading(false);
         }
-        setCustomers(data || []);
-        setFilteredCustomers(data || []);
-        const industryCounts = {};
-        data.forEach(customer => {
-            industryCounts[customer.industry] = (industryCounts[customer.industry] || 0) + 1;
-        });
-        const totalIndustries = Object.keys(industryCounts).length;
-        const topIndustry = Object.entries(industryCounts).sort((a, b) => b[1] - a[1])[0] || ["", 0];
-        setSummary({
-            totalCustomers: data.length,
-            totalIndustries,
-            topIndustry: { name: topIndustry[0], count: topIndustry[1] },
-        });
-        setLoading(false);
     };
+
+    const fetchAccountManagers = async () => {
+        try {
+            const { data } = await activityService.fetchAccountManagers();
+            if (!data.error) setAccountManagers(data);
+        } catch (error) {
+            console.error("Error loading account managers:", error);
+        }
+    };
+
     const handleSearch = (term) => {
         setSearchTerm(term);
-        if (!term.trim()) {
-            setFilteredCustomers(customers);
-            return;
-        }
-        const lowerTerm = term.toLowerCase();
-        const filtered = customers.filter(customer => 
-            (customer.company_name?.toLowerCase() || "").includes(lowerTerm) ||
-            (customer.industry?.toLowerCase() || "").includes(lowerTerm) ||
-            (customer.location?.toLowerCase() || "").includes(lowerTerm) ||
-            (customer.contact_person?.toLowerCase() || "").includes(lowerTerm) ||
-            (customer.email?.toLowerCase() || "").includes(lowerTerm) ||
-            (customer.contact_number?.toLowerCase() || "").includes(lowerTerm)
-        );
-        setFilteredCustomers(filtered);
+        setFilteredCustomers(customerService.filterCustomers(customers, term));
+    };
+
+    const handleRowClick = (e, customer) => {
+        e.preventDefault();
+        setEditingCustomer(customer);
+        setShowModalCustomer(true);
+    };
+
+    const handleCustomerModalClose = () => {
+        setShowModalCustomer(false);
+        setEditingCustomer(null);
+        fetchCustomers();
+    };
+
+    const handleAccountManagerModalClose = () => {
+        setShowModalAccountManager(false);
+        fetchAccountManagers();
+    };
+
+    const handleExportCSV = () => {
+        customerService.exportToCSV(filteredCustomers, "customers.csv");
     };
 
     useEffect(() => {
         fetchCustomers();
+        fetchAccountManagers();
     }, []);
 
-    const handleCustomerModalClose = () => {
-        setShowModalCustomer(false); 
-        // Re-fetch customer
-        fetchCustomers();
-    }
-    return(
+    return (
         <>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                 <SummaryCard title="Total Customers" value={summary.totalCustomers} subtitle="Tracked">
@@ -111,63 +89,91 @@ export default function Customer(){
 
             <div className="bg-white p-4 rounded-xl shadow">
                 <div className="flex flex-col gap-4 md:flex-row md:justify-between md:items-center mb-4">
-                    <Title>Customer Information</Title>
+                    <div>
+                        <Title>Customer Information</Title>
+                        <Subtitle>Right-click row to view/edit customer details</Subtitle>
+                    </div>
                     <label className="flex items-center gap-2 h-10 w-full max-w-lg rounded-md border border-input bg-background px-3 py-2 text-base text-muted-foreground focus-within:ring-teal-800 focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2 md:text-sm">
                         <svg className="w-5 h-5 text-gray-500" viewBox="0 0 15 15" fill="none" xmlns="http://www.w3.org/2000/svg">
                             <path fillRule="evenodd" clipRule="evenodd" d="M10 6.5a3.5 3.5 0 1 1-7 0 3.5 3.5 0 0 1 7 0m-.691 3.516a4.5 4.5 0 1 1 .707-.707l2.838 2.837a.5.5 0 0 1-.708.708z" fill="#000"/>
                         </svg>
                         <input type="text" placeholder="Search customers..." value={searchTerm} onChange={(e) => handleSearch(e.target.value)} className="w-full bg-transparent outline-none placeholder:text-muted-foreground" />
                     </label>
-                    <div className="flex justify-end md:gap-2">
-                        <button type="button" onClick={() => setShowModalCustomer(true)}  className="inline-flex items-center border rounded-lg p-2 bg-slate-700 font-medium text-neutral-100 hover:bg-slate-800 hover:text-neutral-200">Add Customer</button>
-                        <button onClick={() => exportToCSV(filteredCustomers, "customers.csv")} className="inline-flex items-center border rounded-lg p-2 bg-emerald-700 font-medium text-neutral-100 hover:bg-teal-800 hover:text-neutral-200">Export CSV</button>
+                    <div className="flex gap-2">
+                        <button type="button" onClick={() => setShowModalCustomer(true)} className="inline-flex items-center border rounded-lg p-2 bg-slate-700 font-medium text-neutral-100 hover:bg-slate-800">Add Customer</button>
+                        <button type="button" onClick={() => setShowModalAccountManager(true)} className="inline-flex items-center border rounded-lg p-2 bg-blue-700 font-medium text-neutral-100 hover:bg-blue-800">Add Account Manager</button>
+                        <details className="relative">
+                            <summary className="cursor-pointer inline-flex items-center border rounded-lg py-2 px-4 bg-emerald-700 font-medium text-neutral-100 hover:bg-teal-800 transition-colors">Export ↓</summary>
+                            <div className="absolute right-0 mt-2 w-64 rounded-md shadow-lg bg-white ring-1 ring-black/25 z-50">
+                                <ul className="py-1">
+                                    <li><button className="w-full text-left px-4 py-2 hover:bg-blue-50" onClick={handleExportCSV}><div className="font-semibold text-gray-800">CSV Export</div><Subtitle>Download customer data</Subtitle></button></li>
+                                </ul>
+                            </div>
+                        </details>
                     </div>
                 </div>
+                
                 <div className="overflow-x-auto w-full">
-                <table class="w-full min-w-full text-left border-t border-gray-200 space-x-8 space-y-4">
-                    <thead>
-                        <tr class="text-gray-500 text-sm">
-                        <th class="py-2">Date Added</th>
-                        <th class="py-2">Company Name</th>
-                        <th class="py-2">Industry</th>
-                        <th class="py-2">Location</th>
-                        <th class="py-2">Contact Person</th>
-                        <th class="py-2">Email</th>
-                        <th class="py-2">Contact Number</th>
-                        <th class="py-2">Account Manager</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {loading ? (
-                            <tr>
-                                <td colSpan="8" className="text-center py-4">
-                                    <Loader />
-                                </td>
+                    <table className="w-full min-w-full text-left border-t border-gray-200">
+                        <thead>
+                            <tr className="text-gray-500 text-sm">
+                                <th className="py-2">#</th>
+                                <th className="py-2">Company Name</th>
+                                <th className="py-2">Address</th>
+                                <th className="py-2">Industry</th>
+                                <th className="py-2">Location</th>
+                                <th className="py-2">Contact Person</th>
+                                <th className="py-2">Contact Details</th>
+                                <th className="py-2">Website</th>
+                                <th className="py-2">Account Manager</th>
                             </tr>
-                        ) : filteredCustomers.length > 0 ? (
-                            filteredCustomers.map((customer) => (
-                                <tr key={customer.id} className="border-b border-gray-100 hover:bg-blue-50 transition-colors">
-                                    <td className="py-3 px-2">{new Date(customer.created_at).toLocaleDateString()}</td>
-                                    <td className="py-3 px-2">{customer.company_name}</td>
-                                    <td className="py-3 px-2">{customer.industry}</td>
-                                    <td className="py-3 px-2">{customer.location}</td>
-                                    <td className="py-3 px-2">{customer.contact_person}</td>
-                                    <td className="py-3 px-2">{customer.email}</td>
-                                    <td className="py-3 px-2">{customer.contact_number}</td>
-                                    <td className="py-3 px-2"></td>
-                                </tr>
-                            ))
-                        ) : (
-                            <tr>
-                                <td colSpan="8" className="text-center py-4 text-gray-500">No customers found.</td>
-                            </tr>
-                        )}
-                    </tbody>
+                        </thead>
+                        <tbody>
+                            {loading ? (
+                                <tr><td colSpan="8" className="text-center py-4"><Loader /></td></tr>
+                            ) : filteredCustomers.length > 0 ? (
+                                filteredCustomers.map((customer, index) => (
+                                    <tr key={customer.id} onContextMenu={(e) => handleRowClick(e, customer)} className="border-b border-gray-100 hover:bg-blue-50 transition-colors cursor-pointer" title="Right-click to view/edit customer details">
+                                        <td className="py-3 text-gray-400">{index + 1}</td>
+                                        <td className="py-3 px-2 font-semibold">{customer.company_name}</td>
+                                        {customer.address &&<td className="py-3 px-2 max-w-xs text-xs hover:scale-140 hover:bg-white/50 transition"> {customer.address}</td> || <td></td>}
+                                        <td className="py-3 px-2 truncate">{customer.industry}</td>
+                                        <td className="py-3 px-2">{customer.location}</td>
+                                        <td className="py-3 px-2">
+                                            <div className="font-semibold">{customer.contact_person}</div>
+                                            {customer.designation && <div className="text-gray-500 text-sm">{customer.designation}</div>}
+                                        </td>
+                                        <td className="py-3 px-2">
+                                            <div className="font-semibold">{customer.email}</div>
+                                            {customer.contact_number && <div className="text-gray-500 text-sm">{customer.contact_number}</div>}
+                                        </td>
+                                        <td className="py-3 px-2">
+                                            <a href={customer.website} target="_blank" rel="noopener noreferrer" className="text-sky-600 underline text-xs">
+                                                {customer.website}
+                                            </a>
+                                        </td>
+                                        <td className="py-3 px-2">
+                                            {customer.account_manager ? (
+                                                <div>
+                                                    <div className="font-medium">{customer.account_manager.name}</div>
+                                                    <div className="text-xs text-gray-500">{customer.account_manager.department}</div>
+                                                </div>
+                                            ) : (
+                                                <span className="text-gray-400 text-sm truncate">No one assigned yet</span>
+                                            )}
+                                        </td>
+                                    </tr>
+                                ))
+                            ) : (
+                                <tr><td colSpan="8" className="text-center py-4 text-gray-500">No customers found.</td></tr>
+                            )}
+                        </tbody>
                     </table>
                 </div>
-                    <ModalCustomer isOpen={showModalCustomer} onClose={ handleCustomerModalClose } />
+                
+                <ModalCustomer isOpen={showModalCustomer} onClose={handleCustomerModalClose} editingCustomer={editingCustomer} accountManagers={accountManagers} />
+                <ModalAccountManager isOpen={showModalAccountManager} onClose={handleAccountManagerModalClose} />
             </div>
-
         </>
-    )
+    );
 }

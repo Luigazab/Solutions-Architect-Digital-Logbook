@@ -1,6 +1,15 @@
 import { supabase } from '../supabaseClient';
 
 export const activityService ={
+  async getCurrentUser() {
+    const {data: { user }, error} = await supabase.auth.getUser();
+
+    if (error || !user){
+      throw new Error('User noot authenticated');
+    }
+    return { id: user.id, email:user.email};
+  },
+
   async fetchActivities() {
     const { data, error } = await supabase
       .from('activities')
@@ -15,14 +24,65 @@ export const activityService ={
       throw new Error(`Error fetching activities: ${error.message}`);
       return {data: [], error: error.message};
     }
-    return { data, error: null };
+    const enrichedData = await Promise.all(
+      data.map(async (activity) => {
+        if(activity.user){
+          const{data: profile } = await supabase
+            .from('profiles')
+            .select('id, full_name, user_id, title')
+            .eq('user_id', activity.user)
+            .single();
+          return{
+            ...activity,
+            user_profile: profile
+          };
+        }
+        return activity;
+      })
+    );
+    return { data: enrichedData, error: null };
   },
+
+  async fetchActivitiesByDateRange(startDate, endDate){
+    const {data, error} = await supabase
+      .from('activities')
+      .select(`*,
+        category:categories (category_name, color),
+        customer:customers (company_name, industry, location),
+        account_manager:account_managers (name)
+      `)
+      .gte('date', startDate)
+      .lte('date', endDate)
+      .order('date', {ascending:true});
+
+    if(error){
+      throw new Error(`Error fetching activities by date range: ${error.message}`);
+    }
+    const enrichedData = await Promise.all(
+      data.map(async (activity) => {
+        if(activity.user){
+          const{data: profile } = await supabase
+            .from('profiles')
+            .select('id, full_name, user_id, title')
+            .eq('user_id', activity.user)
+            .single();
+          return{
+            ...activity,
+            user_profile: profile
+          };
+        }
+        return activity;
+      })
+    );
+    return { data: enrichedData, error: null };
+  },
+
 
   fetchSolutionsArchitects: async () => {
     try {
       const { data, error } = await supabase
         .from('profiles')
-        .select('id, full_name')
+        .select('id, user_id, full_name')
         .eq('is_solarch', true)
         .order('full_name', { ascending: true });
 
@@ -39,22 +99,55 @@ export const activityService ={
   },
 
   async fetchActivityById(id) {
-    const { data, error } = await supabase
-      .from('activities')
-      .select(`*,
-        category:categories (id, category_name, color),
-        customer:customers (id, company_name, industry, location),
-        account_manager:account_managers (id, name)
-      `)
-      .eq('id', id)
-      .single();
+  // First, get the activity data
+  const { data, error } = await supabase
+    .from('activities')
+    .select(`
+      *,
+      category:categories (id, category_name, color),
+      customer:customers (id, company_name, industry, location),
+      account_manager:account_managers (id, name)
+    `)
+    .eq('id', id)
+    .single();
 
-    if (error) {
-      throw new Error(`Error fetching activity by ID: ${error.message}`);
-      return {data: null, error: error.message};
+  if (error) {
+    throw new Error(`Error fetching activity by ID: ${error.message}`);
+  }
+
+  // Collect all unique user_ids that need profiles
+  const userIds = new Set();
+  if (data.user) userIds.add(data.user);  // Changed from data.user
+  if (data.added_by) userIds.add(data.added_by);
+  if (data.updated_by) userIds.add(data.updated_by);
+
+  // Fetch all needed profiles in one query
+  let profiles = {};
+  if (userIds.size > 0) {
+    const { data: profileData, error: profileError } = await supabase
+      .from('profiles')
+      .select('id, full_name, user_id')
+      .in('user_id', Array.from(userIds));
+
+    if (!profileError && profileData) {
+      // Create a lookup map by user_id
+      profiles = profileData.reduce((acc, profile) => {
+        acc[profile.user_id] = profile;
+        return acc;
+      }, {});
     }
-    return { data, error: null };
-  },
+  }
+
+  // Enrich the activity data with profile information
+  const enrichedActivity = {
+    ...data,
+    user_profile: profiles[data.user] || null,    // Changed from data.user
+    added_by_profile: profiles[data.added_by] || null,
+    updated_by_profile: profiles[data.updated_by] || null
+  };
+
+  return { data: enrichedActivity, error: null };
+},
 
   async insertActivity(payload) {
     const { data, error } = await supabase
@@ -65,9 +158,16 @@ export const activityService ={
   },
 
   async updateActivity(id, payload) {
+
+    const currentUser = await this.getCurrentUser();
+    const updatedPayload = {
+      ...payload,
+      updated_by: currentUser.id
+    };
+
     const { data, error } = await supabase
       .from('activities')
-      .update(payload)
+      .update(updatedPayload)
       .eq('id', id)
       .select();
     return { data, error};

@@ -58,8 +58,8 @@ const createWeekWorksheet = (workbook, weekData, activities, solutionArchitects)
   const worksheet = workbook.addWorksheet(worksheetName);
   
   // Set column widths
-  worksheet.getColumn(1).width = 45; // TECHNICAL SUPPORT
-  worksheet.getColumn(2).width = 35; // SCHEDULE
+  worksheet.getColumn(1).width = 37; // TECHNICAL SUPPORT
+  worksheet.getColumn(2).width = 23; // SCHEDULE
   for (let i = 3; i <= 9; i++) {
     worksheet.getColumn(i).width = 45; // Day columns (increased for more content)
   }
@@ -72,6 +72,13 @@ const createWeekWorksheet = (workbook, weekData, activities, solutionArchitects)
   const headerFont = { color: { argb: 'FF000000' }, bold: true, size: 16 };
   const headerFontBigger = { color: { argb: 'FF000000' }, bold: true, size: 22 };
   const headerAlignment = { horizontal: 'center', vertical: 'middle' };
+
+  const rightAlignment = {horizontal:'right'};
+  const thinBorder = {
+    top: { style: 'thin' }, left: { style: 'thin' }, 
+    bottom: { style: 'thin' }, right: { style: 'thin' }
+  };
+  
   
   // Add header - Integrated Management System
   worksheet.mergeCells('A1:B6');
@@ -82,10 +89,7 @@ const createWeekWorksheet = (workbook, weekData, activities, solutionArchitects)
   headerCell.fill = headerFill;
   headerCell.font = headerFont;
   headerCell.alignment = headerAlignment;
-  headerCell.border = {
-    top: { style: 'thin' }, left: { style: 'thin' }, 
-    bottom: { style: 'thin' }, right: { style: 'thin' }
-  };
+  headerCell.border = thinBorder;
   
   // Add title - TECHNICAL SCHEDULE/MONITORING
   worksheet.mergeCells('C3:F6');
@@ -94,10 +98,22 @@ const createWeekWorksheet = (workbook, weekData, activities, solutionArchitects)
   titleCell.fill = headerFill;
   titleCell.font = headerFontBigger;
   titleCell.alignment = headerAlignment;
-  titleCell.border = {
-    top: { style: 'thin' }, left: { style: 'thin' }, 
-    bottom: { style: 'thin' }, right: { style: 'thin' }
-  };
+  titleCell.border = thinBorder;
+
+  worksheet.getCell('G1').value="Document No"
+  worksheet.getCell('G2').value="Classification"
+  worksheet.getCell('G3').value="Version Number"
+  worksheet.getCell('G4').value="Date"
+  worksheet.getCell('G5').value="Prepared by"
+  worksheet.getCell('G6').value="Reviewed and Approved by"
+
+  worksheet.getCell('G1').alignment= rightAlignment
+  worksheet.getCell('G2').alignment= rightAlignment
+  worksheet.getCell('G3').alignment= rightAlignment
+  worksheet.getCell('G4').alignment= rightAlignment
+  worksheet.getCell('G5').alignment= rightAlignment
+  worksheet.getCell('G6').alignment= rightAlignment
+
   worksheet.mergeCells('A7:I7');
   const blankCell = worksheet.getCell('A7');
   blankCell.value = '';
@@ -106,7 +122,6 @@ const createWeekWorksheet = (workbook, weekData, activities, solutionArchitects)
   blankCell.border = {
     left: { style: 'thick' }, right: { style: 'thick' }
   };
-  
   // Add week covered
   worksheet.mergeCells('B8:I8');
   const weekCell = worksheet.getCell('A8');
@@ -114,19 +129,14 @@ const createWeekWorksheet = (workbook, weekData, activities, solutionArchitects)
   weekCell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFD9E1F2' } };
   weekCell.font = { bold: true, size: 16 };
   weekCell.alignment = headerAlignment;
-  weekCell.border = {
-    top: { style: 'thin' }, left: { style: 'thin' }, 
-    bottom: { style: 'thin' }, right: { style: 'thin' }
-  };
+  weekCell.border = thinBorder;
+
   const weekDayCell = worksheet.getCell('B8');
-  weekDayCell.value = ` ${weekStart.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })} TO ${weekEnd.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}`;
+  weekDayCell.value = ` ${weekStart.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })} to ${weekEnd.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}`;
   weekDayCell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFFFFFFF' } };
   weekDayCell.font = { bold: true, size: 16 };
   weekDayCell.alignment =  { vertical: 'middle' }
-  weekDayCell.border = {
-    top: { style: 'thin' }, left: { style: 'thin' }, 
-    bottom: { style: 'thin' }, right: { style: 'thin' }
-  };
+  weekDayCell.border = thinBorder;
   
   // Generate week dates (Monday to Sunday)
   const weekDates = [];
@@ -178,10 +188,7 @@ const createWeekWorksheet = (workbook, weekData, activities, solutionArchitects)
   teamHeaderCell.value = 'SOLUTION ARCHITECT TEAM';
   teamHeaderCell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF002060' } };
   teamHeaderCell.font = { color: { argb: 'FFFFFFFF' }, bold: true, size: 26 };
-  teamHeaderCell.border = {
-    top: { style: 'thin' }, left: { style: 'thin' }, 
-    bottom: { style: 'thin' }, right: { style: 'thin' }
-  }
+  teamHeaderCell.border = thinBorder;
   teamHeaderCell.alignment = headerAlignment;
   
   let currentRow = 12;
@@ -199,7 +206,7 @@ const createWeekWorksheet = (workbook, weekData, activities, solutionArchitects)
         row.getCell(1).value = solarch || 'Unassigned';
         row.getCell(1).fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF00B0F0' } };
         row.getCell(1).font = { bold: true, size: 16 };
-        row.getCell(1).alignment = { horizontal: 'center', vertical: 'middle' };
+        row.getCell(1).alignment = { horizontal: 'center', vertical: 'middle',  wrapText: true  };
       }
       
       // Schedule column
@@ -213,16 +220,13 @@ const createWeekWorksheet = (workbook, weekData, activities, solutionArchitects)
       scheduleCell.fill = scheduleFill;
       scheduleCell.font = {color: { argb: 'FF000000' }, bold: true, size: 16 };
       scheduleCell.alignment = { horizontal: 'center', vertical: 'middle' };
-      scheduleCell.border = {
-            top: { style: 'thin' }, left:{style: 'thin'},
-            bottom: { style: 'thin' }, right: { style: 'thin' }
-        };
+      scheduleCell.border = thinBorder;
       
       // Add activities for each day
       weekDates.forEach((date, dayIndex) => {
         const dateKey = formatDate(date);
         const dayActivities = activities.filter(activity => 
-          activity.solarch === solarch && formatDate(new Date(activity.date)) === dateKey
+          activity.user_profile?.full_name === solarch && formatDate(new Date(activity.date)) === dateKey
         ).sort((a, b) => a.start_time.localeCompare(b.start_time));
         
         const cell = row.getCell(3 + dayIndex);
@@ -236,21 +240,18 @@ const createWeekWorksheet = (workbook, weekData, activities, solutionArchitects)
         
         if (rowActivities.length > 0) {
           const activityText = rowActivities.map(activity => {
-            const categoryText = activity.categories?.category_name ? 
-              ` [${activity.categories.category_name}]` : '';
-            return `${activity.start_time}-${activity.end_time}: ${activity.title} ${activity.description} ${activity.customer?.company_name} ${categoryText}`;
+            const categoryText = activity.category?.category_name ? 
+              ` [${activity.category.category_name}]` : '';
+            return `${activity.start_time}-${activity.end_time}: ${activity.title} ${activity.description ? ' ' + activity.description : ''} ${activity.customer?.company_name} ${categoryText}`;
           }).join('\n');
           
           cell.value = activityText;
-          cell.alignment = { horizontal: 'center', vertical: 'middle', wrapText: true };
-          cell.font = {color: { argb: 'FF002060' }, bold:true, size: 16 };
         }
         
+        cell.alignment = { horizontal: 'center', vertical: 'middle', wrapText: true };
+        cell.font = {color: { argb: 'FF002060' }, bold:true, size: 16 };
         // Add border to all cells
-        cell.border = {
-          top: { style: 'thin' }, left: { style: 'thin' },
-          bottom: { style: 'thin' }, right: { style: 'thin' }
-        };
+        cell.border = thinBorder;
       });
 
       // Set row height for better visibility
@@ -267,10 +268,7 @@ const createWeekWorksheet = (workbook, weekData, activities, solutionArchitects)
         
         for (let col = 1; col <= 9; col++) {
         const cell = blankRow.getCell(col);
-        cell.border = {
-            top: { style: 'thin' }, left: { style: 'thin' },
-            bottom: { style: 'thin' }, right: { style: 'thin' }
-        };
+        cell.border = thinBorder;
         cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF002060' } };
         }
         
@@ -284,10 +282,7 @@ const createWeekWorksheet = (workbook, weekData, activities, solutionArchitects)
     for (let col = 1; col <= 9; col++) {
       const cell = worksheet.getCell(row, col);
       if (!cell.border) {
-        cell.border = {
-          top: { style: 'thin' }, left: { style: 'thin' },
-          bottom: { style: 'thin' }, right: { style: 'thin' }
-        };
+        cell.border = thinBorder;
       }
     }
   }
@@ -316,8 +311,13 @@ export const exportMonthlyScheduleToExcel = async (month, year, activities) => {
   try {
     // Get all unique solution architects
     const solutionArchitects = [...new Set(activities.map(activity => 
-      activity.solarch || 'Unassigned'
-    ))].sort();
+      activity.user_profile?.full_name
+    ).filter(name => name))].sort();
+
+    const hasUnassigned = activities.some(activity => !activity.user_profile?.full_name);
+    if (hasUnassigned) {
+      solutionArchitects.push('Unassigned');
+    }
     
     // Get all weeks in the month
     const weeks = getWeeksInMonth(month, year);
@@ -326,8 +326,8 @@ export const exportMonthlyScheduleToExcel = async (month, year, activities) => {
     const workbook = new ExcelJS.Workbook();
     
     // Set workbook properties
-    workbook.creator = 'Activity Calendar System';
-    workbook.lastModifiedBy = 'Activity Calendar System';
+    workbook.creator = 'Product-Solutions Architect Management Team';
+    workbook.lastModifiedBy = 'Product-Solutions Architect Management Team';
     workbook.created = new Date();
     workbook.modified = new Date();
     
