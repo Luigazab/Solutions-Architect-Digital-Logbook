@@ -56,9 +56,11 @@ export default function RecentActivities(){
                     />
                 ))}
             </div>
+            <Link to="report">
             <div className="text-center mt-4">
-                <a href="report" className="inline-block w-full text-sm border border-gray-400 py-2 rounded-lg hover:bg-gray-800 hover:text-white">View All Activities</a>
+                <div className="inline-block w-full text-sm border border-gray-400 py-2 rounded-lg hover:bg-gray-800 hover:text-white">View All Activities</div>
             </div>
+            </Link>
         </>
     );
 }
