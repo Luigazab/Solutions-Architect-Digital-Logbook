@@ -1,3 +1,6 @@
+
+// activity.js caters to: LogActivty's insert capabilities, LogActivity's customer, account manager, solution architect dropdown, Schedule's display activities, Account Manager modal
+
 import { supabase } from '../supabaseClient';
 
 export const activityService ={
@@ -5,13 +8,62 @@ export const activityService ={
     const {data: { user }, error} = await supabase.auth.getUser();
 
     if (error || !user){
-      throw new Error('User noot authenticated');
+      throw new Error('User not authenticated');
     }
     return { id: user.id, email:user.email};
   },
 
+  // Helper function to enrich data with profiles
+  async enrichWithProfiles(data, userIdFields = ['user', 'added_by', 'updated_by']) {
+    if (!data || (Array.isArray(data) && data.length === 0)) {
+      return data;
+    }
+
+    const items = Array.isArray(data) ? data : [data];
+    const userIds = new Set();
+
+    // Collect all unique user_ids that need profiles
+    items.forEach(item => {
+      userIdFields.forEach(field => {
+        if (item[field]) userIds.add(item[field]);
+      });
+    });
+
+    // Fetch all needed profiles in one query
+    let profiles = {};
+    if (userIds.size > 0) {
+      const { data: profileData, error: profileError } = await supabase
+        .from('profiles')
+        .select('id, full_name, user_id, title')
+        .in('user_id', Array.from(userIds));
+
+      if (!profileError && profileData) {
+        // Create a lookup map by user_id
+        profiles = profileData.reduce((acc, profile) => {
+          acc[profile.user_id] = profile;
+          return acc;
+        }, {});
+      }
+    }
+
+    // Enrich the data with profile information
+    const enrichedItems = items.map(item => {
+      const enriched = { ...item };
+      
+      userIdFields.forEach(field => {
+        if (item[field]) {
+          enriched[`${field}_profile`] = profiles[item[field]] || null;
+        }
+      });
+
+      return enriched;
+    });
+
+    return Array.isArray(data) ? enrichedItems : enrichedItems[0];
+  },
+
   async fetchActivities() {
-    const { data, error } = await supabase
+    const {data, error} = await supabase
       .from('activities')
       .select(`*,
         category:categories (category_name, color),
@@ -22,24 +74,9 @@ export const activityService ={
 
     if (error) {
       throw new Error(`Error fetching activities: ${error.message}`);
-      return {data: [], error: error.message};
     }
-    const enrichedData = await Promise.all(
-      data.map(async (activity) => {
-        if(activity.user){
-          const{data: profile } = await supabase
-            .from('profiles')
-            .select('id, full_name, user_id, title')
-            .eq('user_id', activity.user)
-            .single();
-          return{
-            ...activity,
-            user_profile: profile
-          };
-        }
-        return activity;
-      })
-    );
+
+    const enrichedData = await this.enrichWithProfiles(data);
     return { data: enrichedData, error: null };
   },
 
@@ -58,25 +95,10 @@ export const activityService ={
     if(error){
       throw new Error(`Error fetching activities by date range: ${error.message}`);
     }
-    const enrichedData = await Promise.all(
-      data.map(async (activity) => {
-        if(activity.user){
-          const{data: profile } = await supabase
-            .from('profiles')
-            .select('id, full_name, user_id, title')
-            .eq('user_id', activity.user)
-            .single();
-          return{
-            ...activity,
-            user_profile: profile
-          };
-        }
-        return activity;
-      })
-    );
+
+    const enrichedData = await this.enrichWithProfiles(data);
     return { data: enrichedData, error: null };
   },
-
 
   fetchSolutionsArchitects: async () => {
     try {
@@ -99,55 +121,24 @@ export const activityService ={
   },
 
   async fetchActivityById(id) {
-  // First, get the activity data
-  const { data, error } = await supabase
-    .from('activities')
-    .select(`
-      *,
-      category:categories (id, category_name, color),
-      customer:customers (id, company_name, industry, location),
-      account_manager:account_managers (id, name)
-    `)
-    .eq('id', id)
-    .single();
+    const { data, error } = await supabase
+      .from('activities')
+      .select(`
+        *,
+        category:categories (id, category_name, color),
+        customer:customers (id, company_name, industry, location),
+        account_manager:account_managers (id, name)
+      `)
+      .eq('id', id)
+      .single();
 
-  if (error) {
-    throw new Error(`Error fetching activity by ID: ${error.message}`);
-  }
-
-  // Collect all unique user_ids that need profiles
-  const userIds = new Set();
-  if (data.user) userIds.add(data.user);  // Changed from data.user
-  if (data.added_by) userIds.add(data.added_by);
-  if (data.updated_by) userIds.add(data.updated_by);
-
-  // Fetch all needed profiles in one query
-  let profiles = {};
-  if (userIds.size > 0) {
-    const { data: profileData, error: profileError } = await supabase
-      .from('profiles')
-      .select('id, full_name, user_id')
-      .in('user_id', Array.from(userIds));
-
-    if (!profileError && profileData) {
-      // Create a lookup map by user_id
-      profiles = profileData.reduce((acc, profile) => {
-        acc[profile.user_id] = profile;
-        return acc;
-      }, {});
+    if (error) {
+      throw new Error(`Error fetching activity by ID: ${error.message}`);
     }
-  }
 
-  // Enrich the activity data with profile information
-  const enrichedActivity = {
-    ...data,
-    user_profile: profiles[data.user] || null,    // Changed from data.user
-    added_by_profile: profiles[data.added_by] || null,
-    updated_by_profile: profiles[data.updated_by] || null
-  };
-
-  return { data: enrichedActivity, error: null };
-},
+    const enrichedActivity = await this.enrichWithProfiles(data);
+    return { data: enrichedActivity, error: null };
+  },
 
   async insertActivity(payload) {
     const { data, error } = await supabase
@@ -158,7 +149,6 @@ export const activityService ={
   },
 
   async updateActivity(id, payload) {
-
     const currentUser = await this.getCurrentUser();
     const updatedPayload = {
       ...payload,
@@ -177,7 +167,7 @@ export const activityService ={
     const { data, error } = await supabase
       .from('activities')
       .delete()
-      .eq('id', id)
+      .eq('id', id);
     return { data, error};
   },
 
@@ -188,15 +178,22 @@ export const activityService ={
       .order('company_name');
     return { data: data || [], error };
   },
-  
+
   async fetchAccountManagers() {
     const { data, error } = await supabase
       .from('account_managers')
       .select('*')
       .order('name');
-    return { data: data || [], error };
+    
+    if (error) {
+      return { data: [], error };
+    }
+
+    // Enrich with profiles for added_by and updated_by
+    const enrichedData = await this.enrichWithProfiles(data, ['added_by', 'updated_by']);
+    return { data: enrichedData || [], error: null };
   },
-  
+
   generateSummary(activities) {
     const totalActivities = activities.length;
     const averageActivities = totalActivities > 0 ? totalActivities / 30 : 0; 
@@ -209,8 +206,7 @@ export const activityService ={
     };
   },
 
-
-  //For Activities Breakdown
+  // For Activities Breakdown
   generateCategoryBreakdown(activities) {
     const categories = {};
     activities.forEach(activity => {
@@ -228,8 +224,7 @@ export const activityService ={
     }));
   },
 
-
-  //For top customers panel
+  // For top customers panel
   generateCustomerStats(activities){
     const customerActivity = {};
     activities.forEach(activity => {
