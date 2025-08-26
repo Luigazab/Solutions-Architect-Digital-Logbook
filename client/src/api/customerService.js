@@ -1,6 +1,53 @@
 import { supabase } from "../supabaseClient";
 
 export const customerService = {
+  async enrichWithProfiles(data, userIdFields = ['added_by', 'updated_by']) {
+    if (!data || (Array.isArray(data) && data.length === 0)) {
+      return data;
+    }
+
+    const items = Array.isArray(data) ? data : [data];
+    const userIds = new Set();
+
+    // Collect all unique user_ids that need profiles
+    items.forEach(item => {
+      userIdFields.forEach(field => {
+        if (item[field]) userIds.add(item[field]);
+      });
+    });
+
+    // Fetch all needed profiles in one query
+    let profiles = {};
+    if (userIds.size > 0) {
+      const { data: profileData, error: profileError } = await supabase
+        .from('profiles')
+        .select('id, full_name, user_id, title')
+        .in('user_id', Array.from(userIds));
+
+      if (!profileError && profileData) {
+        // Create a lookup map by user_id
+        profiles = profileData.reduce((acc, profile) => {
+          acc[profile.user_id] = profile;
+          return acc;
+        }, {});
+      }
+    }
+
+    // Enrich the data with profile information
+    const enrichedItems = items.map(item => {
+      const enriched = { ...item };
+      
+      userIdFields.forEach(field => {
+        if (item[field]) {
+          enriched[`${field}_profile`] = profiles[item[field]] || null;
+        }
+      });
+
+      return enriched;
+    });
+
+    return Array.isArray(data) ? enrichedItems : enrichedItems[0];
+  },
   async fetchCustomers() {
     const { data, error } = await supabase
       .from("customers")
@@ -11,7 +58,9 @@ export const customerService = {
       .order("created_at", { ascending: false });
     
     if (error) throw error;
-    return data || [];
+
+    const enrichedData = await this.enrichWithProfiles(data || []);
+    return enrichedData;
   },
 
   async createCustomer(customerData) {
@@ -36,7 +85,8 @@ export const customerService = {
       .from("customers")
       .update({
         ...customerData,
-        updated_by: user?.id
+        updated_by: user?.id,
+        updated_at: new Date().toISOString()
       })
       .eq('id', id)
       .select()
@@ -81,11 +131,22 @@ export const customerService = {
     if (!data.length) return;
     
     const csvRows = [];
-    const headers = Object.keys(data[0]);
+    const headers = Object.keys(data[0]).filter(key => 
+      !key.includes('account_manager') && !key.includes('_profile')
+    );
+    headers.push('account_manager_name', 'account_manager_department');
     csvRows.push(headers.join(","));
     
     for (const row of data) {
-      const values = headers.map(h => `"${row[h] ?? ""}"`);
+      const values = headers.map(h => {
+        if (h === 'account_manager_name') {
+          return `"${row.account_manager?.name || ""}"`;
+        }
+        if (h === 'account_manager_department') {
+          return `"${row.account_manager?.position || ""}"`;
+        }
+        return `"${row[h] ?? ""}"`;
+      });
       csvRows.push(values.join(","));
     }
     

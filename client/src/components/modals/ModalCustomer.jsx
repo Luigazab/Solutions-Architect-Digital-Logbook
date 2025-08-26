@@ -4,7 +4,7 @@ import TextInput from "../TextInput";
 import SelectField from "../Dropdown";
 import { customerService } from "../../api/customerService";
 
-export default function ModalCustomer({ isOpen, onClose, editingCustomer = null, accountManagers = [] }) {
+export default function ModalCustomer({ isOpen, onClose, customer=null, mode="add", accountManagers = [] }) {
   const [formData, setFormData] = useState({
     company_name: "",
     industry: "",
@@ -18,25 +18,30 @@ export default function ModalCustomer({ isOpen, onClose, editingCustomer = null,
     account_manager: ""
   });
   const [loading, setLoading] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
 
   useEffect(() => {
-    if (editingCustomer) {
-      setFormData({
-        company_name: editingCustomer.company_name || "",
-        industry: editingCustomer.industry || "",
-        address: editingCustomer.address || "",
-        location: editingCustomer.location || "",
-        contact_person: editingCustomer.contact_person || "",
-        designation: editingCustomer.designation || "",
-        contact_number: editingCustomer.contact_number || "",
-        email: editingCustomer.email || "",
-        website: editingCustomer.website || "",
-        account_manager: editingCustomer.account_manager?.id || ""
-      });
-    } else {
-      resetForm();
+    if(isOpen){
+      if (customer && mode === "view") {
+        setFormData({
+          company_name: customer.company_name || "",
+          industry: customer.industry || "",
+          address: customer.address || "",
+          location: customer.location || "",
+          contact_person: customer.contact_person || "",
+          designation: customer.designation || "",
+          contact_number: customer.contact_number || "",
+          email: customer.email || "",
+          website: customer.website || "",
+          account_manager: customer.account_manager?.id || ""
+        });
+        setIsEditing(false);
+      }else if(mode === "add"){
+        resetForm();
+        setIsEditing(false);
+      }
     }
-  }, [editingCustomer, isOpen]);
+  }, [isOpen, customer, mode]);
 
   const resetForm = () => {
     setFormData({
@@ -58,6 +63,10 @@ export default function ModalCustomer({ isOpen, onClose, editingCustomer = null,
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
+  const handleClose = () => {
+    setIsEditing(false);
+    onClose();
+  };
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
@@ -70,14 +79,14 @@ export default function ModalCustomer({ isOpen, onClose, editingCustomer = null,
 
       const customerData = { ...formData, website: finalUrl, account_manager: formData.account_manager || null };
 
-      if (editingCustomer) {
-        await customerService.updateCustomer(editingCustomer.id, customerData);
-      } else {
+      if ( mode === "add") {
         await customerService.createCustomer(customerData);
+        resetForm();
+      } else {
+        await customerService.updateCustomer(customer.id, customerData);
+        setIsEditing(false);
       }
-
       onClose();
-      resetForm();
     } catch (error) {
       alert(error.message);
     } finally {
@@ -85,40 +94,103 @@ export default function ModalCustomer({ isOpen, onClose, editingCustomer = null,
     }
   };
 
-  const handleClose = () => {
-    onClose();
-    resetForm();
+
+  const getTitle = () => {
+    if(mode === "add") return "Create New Customer";
+    if(isEditing) return "Edit Customer";
+    return "Customer Details";
+  };
+
+  const isViewMode = mode === "view" && !isEditing;
+
+  const formatDate = (dateString) => {
+    return new Date(dateString).toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
   };
 
   return (
-    <Modal isOpen={isOpen} onClose={handleClose} title={editingCustomer ? "Edit Customer" : "Create New Customer"}>
+    <Modal isOpen={isOpen} onClose={handleClose} title={getTitle()}>
       <form className="space-y-4" onSubmit={handleSubmit}>
-        <TextInput label="Company Name" name="company_name" placeholder="Company name" value={formData.company_name} onChange={handleChange} required />
-        <TextInput label="Industry" name="industry" placeholder="e.g., Healthcare, Finance" value={formData.industry} onChange={handleChange} />
-        <TextInput label="Address" name="address" placeholder="Street, Bldg. Unit." value={formData.address} onChange={handleChange} />
-        <TextInput label="Location" name="location" placeholder="City, Region" value={formData.location} onChange={handleChange} />
+        <TextInput label="Company Name" name="company_name" placeholder="Company name" value={formData.company_name} onChange={handleChange} disabled={isViewMode} required={true} />
+        <TextInput label="Industry" name="industry" placeholder="e.g., Healthcare, Finance" value={formData.industry} onChange={handleChange} disabled={isViewMode} required={true} />
+        <TextInput label="Address" name="address" placeholder="Street, Bldg. Unit." value={formData.address} onChange={handleChange} disabled={isViewMode} required={true} />
+        <TextInput label="Location" name="location" placeholder="City, Region" value={formData.location} onChange={handleChange} disabled={isViewMode} required={true} />
 
         <div className="grid grid-cols-2 gap-2">
-          <TextInput label="Contact Person" name="contact_person" placeholder="Contact person name" value={formData.contact_person} onChange={handleChange} />
-          <TextInput label="Designation" name="designation" placeholder="IT Manager, Admin" value={formData.designation} onChange={handleChange} />
-          <TextInput label="Contact Number" name="contact_number" placeholder="+63 912 456 7890" type="tel" value={formData.contact_number} onChange={handleChange} />
-          <TextInput label="Contact Email" name="email" placeholder="email@example.com" type="text" value={formData.email} onChange={handleChange} />
+          <TextInput label="Contact Person" name="contact_person" placeholder="Contact person name" value={formData.contact_person} onChange={handleChange} disabled={isViewMode} />
+          <TextInput label="Designation" name="designation" placeholder="IT Manager, Admin" value={formData.designation} onChange={handleChange} disabled={isViewMode} />
+          <TextInput label="Contact Number" name="contact_number" placeholder="+63 912 456 7890" type="tel" value={formData.contact_number} onChange={handleChange} disabled={isViewMode} />
+          <TextInput label="Contact Email" name="email" placeholder="email@example.com" type="text" value={formData.email} onChange={handleChange} disabled={isViewMode} />
         </div>
 
-        <TextInput label="Website" name="website" placeholder="https://example.com" value={formData.website} onChange={handleChange} />
-        {editingCustomer && (
-          <SelectField label="Account Manager" name="account_manager" value={formData.account_manager} onChange={handleChange} selectmessage="Select Account Manager (Optional)" allowEmpty={true}
+        <TextInput label="Website" name="website" placeholder="https://example.com" value={formData.website} onChange={handleChange} disabled={isViewMode}/>
+        <SelectField label="Account Manager" name="account_manager" value={formData.account_manager} onChange={handleChange} selectmessage="Select Account Manager (Optional)" allowEmpty={true} disabled={isViewMode}
             options={accountManagers.map(manager => ({ value: manager.id, label: `${manager.name} - ${manager.position}` }))}/>
-
-        )
-
-        }
-
+        {mode === "view" && customer && (
+          <div className="bg-gray-50 p-4 rounded-lg space-y-3">
+            <h4 className="font-medium text-gray-900">Customer Information</h4>
+            <div className="grid grid-cols-2 gap-4 text-sm">
+              <div>
+                <span className="font-medium text-gray-600">Created:</span>
+                <p className="text-gray-900">{formatDate(customer.created_at)}</p>
+              </div>
+              <div>
+                <span className="font-medium text-gray-600">Created by:</span>
+                <p className="text-gray-900">{customer.added_by_profile.full_name || '-'}</p>
+              </div>
+              {customer.updated_at && (
+                <>
+                  <div>
+                    <span className="font-medium text-gray-600">Last Updated:</span>
+                    <p className="text-gray-900">{formatDate(customer.updated_at)}</p>
+                  </div>
+                  <div>
+                    <span className="font-medium text-gray-600">Updated by:</span>
+                    <p className="text-gray-900">{customer.updated_by_profile.full_name || '-'}</p>
+                  </div>
+                </>
+              )}
+            </div>
+            
+            <div className="pt-2 border-t border-gray-200">
+              <div className="grid grid-cols-1 gap-2 text-sm">
+                {customer.website && (
+                  <div className="flex items-center gap-2">
+                    <span className="font-medium text-gray-600">Website:</span>
+                    <a href={customer.website} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:text-blue-800 underline">
+                      {customer.website}
+                    </a>
+                  </div>
+                )}
+                {customer.account_manager && (
+                  <div>
+                    <span className="font-medium text-gray-600">Current Account Manager:</span>
+                    <p className="text-gray-900">
+                      {customer.account_manager.name} - {customer.account_manager.position}
+                      <span className="text-gray-500 text-xs ml-2">({customer.account_manager.department})</span>
+                    </p>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
         <div className="flex justify-end gap-2 mt-4">
-          <button type="button" onClick={handleClose} className="px-4 py-2 bg-gray-300 rounded">Cancel</button>
-          <button type="submit" className="px-4 py-2 bg-blue-600 text-white rounded" disabled={loading}>
-            {loading ? (editingCustomer ? "Updating..." : "Creating...") : (editingCustomer ? "Update Customer" : "Create Customer")}
+          <button type="button" onClick={handleClose} className="px-4 py-2 bg-gray-300 rounded hover:scale-99">Cancel</button>
+          {isViewMode ? (
+            <button type="button" onClick={() => setIsEditing(true)} className="px-4 py-2 bg-sky-600 hover:bg-sky-700 text-white rounded">
+              Edit Customer
+            </button>
+          ) : (
+          <button type="submit" className="px-4 py-2 bg-sky-950 hover:scale-99 text-white rounded" disabled={loading}>
+            {loading ? (mode === "add" ? "Creating..." : "Updating...") : (mode === "add" ? "Create Customer" : "Update Customer")}
           </button>
+          )}
         </div>
       </form>
     </Modal>

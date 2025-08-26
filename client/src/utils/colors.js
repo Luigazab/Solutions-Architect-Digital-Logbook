@@ -9,6 +9,36 @@ const COLOR_MAP = {
     border: 'border-blue-200',
     iconBg: 'bg-blue-500'
   },
+  cyan: {
+    bg: 'bg-cyan-50',
+    text: 'text-cyan-700',
+    ring: 'ring-cyan-600/20',
+    badge: 'bg-cyan-100 text-cyan-600',
+    hover: 'hover:bg-cyan-100',
+    gradient: 'bg-gradient-to-r from-cyan-50 to-cyan-100',
+    border: 'border-cyan-200',
+    iconBg: 'bg-cyan-500'
+  },
+  sky: {
+    bg: 'bg-sky-50',
+    text: 'text-sky-700',
+    ring: 'ring-sky-600/20',
+    badge: 'bg-sky-100 text-sky-600',
+    hover: 'hover:bg-sky-100',
+    gradient: 'bg-gradient-to-r from-sky-50 to-sky-100',
+    border: 'border-sky-200',
+    iconBg: 'bg-sky-500'
+  },
+  lime: {
+    bg: 'bg-lime-50',
+    text: 'text-lime-700',
+    ring: 'ring-lime-600/20',
+    badge: 'bg-lime-100 text-lime-600',
+    hover: 'hover:bg-lime-100',
+    gradient: 'bg-gradient-to-r from-lime-50 to-lime-100',
+    border: 'border-lime-200',
+    iconBg: 'bg-lime-500'
+  },
   green: {
     bg: 'bg-green-50',
     text: 'text-green-700',
@@ -19,6 +49,26 @@ const COLOR_MAP = {
     border: 'border-green-200',
     iconBg: 'bg-green-500'
   },
+  emerald: {
+    bg: 'bg-emerald-50',
+    text: 'text-emerald-700',
+    ring: 'ring-emerald-600/20',
+    badge: 'bg-emerald-100 text-emerald-600',
+    hover: 'hover:bg-emerald-100',
+    gradient: 'bg-gradient-to-r from-emerald-50 to-emerald-100',
+    border: 'border-emerald-200',
+    iconBg: 'bg-emerald-500'
+  },
+  violet: {
+    bg: 'bg-violet-50',
+    text: 'text-violet-700',
+    ring: 'ring-violet-600/20',
+    badge: 'bg-violet-100 text-violet-600',
+    hover: 'hover:bg-violet-100',
+    gradient: 'bg-gradient-to-r from-violet-50 to-violet-100',
+    border: 'border-violet-200',
+    iconBg: 'bg-violet-500'
+  },
   purple: {
     bg: 'bg-purple-50',
     text: 'text-purple-700',
@@ -28,6 +78,16 @@ const COLOR_MAP = {
     gradient: 'bg-gradient-to-r from-purple-50 to-purple-100',
     border: 'border-purple-200',
     iconBg: 'bg-purple-500'
+  },
+  fuchsia: {
+    bg: 'bg-fuchsia-50',
+    text: 'text-fuchsia-700',
+    ring: 'ring-fuchsia-600/20',
+    badge: 'bg-fuchsia-100 text-fuchsia-600',
+    hover: 'hover:bg-fuchsia-100',
+    gradient: 'bg-gradient-to-r from-fuchsia-50 to-fuchsia-100',
+    border: 'border-fuchsia-200',
+    iconBg: 'bg-fuchsia-500'
   },
   red: {
     bg: 'bg-red-50',
@@ -59,6 +119,16 @@ const COLOR_MAP = {
     border: 'border-orange-200',
     iconBg: 'bg-orange-500'
   },
+  amber: {
+    bg: 'bg-amber-50',
+    text: 'text-amber-700',
+    ring: 'ring-amber-600/20',
+    badge: 'bg-amber-100 text-amber-600',
+    hover: 'hover:bg-amber-100',
+    gradient: 'bg-gradient-to-r from-amber-50 to-amber-100',
+    border: 'border-amber-200',
+    iconBg: 'bg-amber-500'
+  },
   indigo: {
     bg: 'bg-indigo-50',
     text: 'text-indigo-700',
@@ -79,6 +149,46 @@ const COLOR_MAP = {
     border: 'border-pink-200',
     iconBg: 'bg-pink-500'
   },
+  rose: {
+    bg: 'bg-rose-50',
+    text: 'text-rose-700',
+    ring: 'ring-rose-600/20',
+    badge: 'bg-rose-100 text-rose-600',
+    hover: 'hover:bg-rose-100',
+    gradient: 'bg-gradient-to-r from-rose-50 to-rose-100',
+    border: 'border-rose-200',
+    iconBg: 'bg-rose-500'
+  },
+  stone: {
+    bg: 'bg-stone-50',
+    text: 'text-stone-700',
+    ring: 'ring-stone-600/20',
+    badge: 'bg-stone-100 text-stone-600',
+    hover: 'hover:bg-stone-100',
+    gradient: 'bg-gradient-to-r from-stone-50 to-stone-100',
+    border: 'border-stone-200',
+    iconBg: 'bg-stone-500'
+  },
+  neutral: {
+    bg: 'bg-neutral-50',
+    text: 'text-neutral-700',
+    ring: 'ring-neutral-600/20',
+    badge: 'bg-neutral-100 text-neutral-600',
+    hover: 'hover:bg-neutral-100',
+    gradient: 'bg-gradient-to-r from-neutral-50 to-neutral-100',
+    border: 'border-neutral-200',
+    iconBg: 'bg-neutral-500'
+  },
+  zinc: {
+    bg: 'bg-zinc-50',
+    text: 'text-zinc-700',
+    ring: 'ring-zinc-600/20',
+    badge: 'bg-zinc-100 text-zinc-600',
+    hover: 'hover:bg-zinc-100',
+    gradient: 'bg-gradient-to-r from-zinc-50 to-zinc-100',
+    border: 'border-zinc-200',
+    iconBg: 'bg-zinc-500'
+  },
   teal: {
     bg: 'bg-teal-50',
     text: 'text-teal-700',
@@ -98,6 +208,16 @@ const COLOR_MAP = {
     gradient: 'bg-gradient-to-r from-gray-50 to-gray-100',
     border: 'border-gray-200',
     iconBg: 'bg-gray-500'
+  },
+  slate: {
+    bg: 'bg-slate-50',
+    text: 'text-slate-700',
+    ring: 'ring-slate-600/20',
+    badge: 'bg-slate-100 text-slate-600',
+    hover: 'hover:bg-slate-100',
+    gradient: 'bg-gradient-to-r from-slate-50 to-slate-100',
+    border: 'border-slate-200',
+    iconBg: 'bg-slate-500'
   }
 };
 
@@ -117,6 +237,12 @@ export const getBgClass = (colorName) => {
   const colors = getColorClasses(colorName);
   return colors.bg;
 };
+
+export const getPreviewClass = (colorName) => {
+  const colors = getColorClasses(colorName);
+  return colors.iconBg;
+};
+
 
 // Helper for getting just the text class
 export const getTextClass = (colorName) => {
