@@ -107,12 +107,12 @@ export default function LogActivity() {
       title: form.title,
       description: form.description,
       date: form.date,
-      start_time: form.startTime,
-      end_time: form.endTime,
-      mode: form.mode,
-      participants: form.participants,
-      customer: form.customer,
-      account_manager: form.accountManager,
+      start_time: form.startTime || null,
+      end_time: form.endTime || null,
+      mode: form.mode || null,
+      participants: form.participants || null,
+      customer: form.customer || null,
+      account_manager: form.accountManager || null,
       meeting_participants: form.meetingParticipants,
       technologies_used: form.technologiesDiscussed,
       outcomes: form.outcomes,
@@ -174,6 +174,7 @@ export default function LogActivity() {
                   handleChange(e)
                 }}
                 selectmessage={"Select Activity Category"}
+                allowEmpty={false}
                 options={[
                   {value: "client_visit", label: "Client Visit"},
                   {value: "meetings_attended", label: "Meetings Attended"},
@@ -183,18 +184,18 @@ export default function LogActivity() {
                   {value: "knowledge_transfer", label: "Knowledge Transfer"},
                 ]}
               />
-              <SelectField label="Solutions Architect" name="solarch" value={form.solarch} onChange={handleChange} selectmessage={"Select Solutions Architect"}
+              <SelectField label="Solutions Architect" name="solarch" value={form.solarch} onChange={handleChange} selectmessage={"Select Solutions Architect"} allowEmpty={false}
                 options={solutionsArchitects.map(solarch => ({ 
                   value: solarch.id, 
                   label: solarch.full_name 
                 }))}
               />
             </div>
-            <TextInput label="Title" name="title" value={form.title} onChange={handleChange} type="text" placeholder="Brief title for this activity" />
+            <TextInput label="Title" name="title" value={form.title} onChange={handleChange} type="text" placeholder="Brief title for this activity" required={true} />
             <TextArea label="Description" name="description"  value={form.description} onChange={handleChange} placeholder="Detailed description of the activity" />
             
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-              <TextInput label="Date" name="date" value={form.date} onChange={handleChange} type="date" />
+              <TextInput label="Date" name="date" value={form.date} onChange={handleChange} type="date"required={true}/>
               <TextInput label="Start Time" name="startTime" value={form.startTime} type="time" onChange={handleChange} />
               <TextInput label="End Time" name="endTime" value={form.endTime} onChange={handleChange} type="time" />
             </div>
