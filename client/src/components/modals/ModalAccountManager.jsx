@@ -101,8 +101,8 @@ export default function ModalAccountManager({ isOpen, onClose, manager = null, m
     <Modal isOpen={isOpen} onClose={handleClose} title={getTitle()}>
       <form className="space-y-4" onSubmit={handleSubmit}>
         <TextInput label="Account Manager Name" placeholder="Account manager name" value={name} onChange={e => setName(e.target.value)} disabled={isViewMode} required={true} />
-        <TextInput label="Position" placeholder="e.g., Manager, Team Lead" value={position} onChange={e => setPosition(e.target.value)} disabled={isViewMode} required={true} />
-        <TextInput label="Department" placeholder="e.g., Sales Force, Technical" value={department} onChange={e => setDepartment(e.target.value)} disabled={isViewMode} required={true} />
+        <TextInput label="Position" placeholder="e.g., Manager, Team Lead" value={position} onChange={e => setPosition(e.target.value)} disabled={isViewMode} />
+        <TextInput label="Department" placeholder="e.g., Sales Force, Technical" value={department} onChange={e => setDepartment(e.target.value)} disabled={isViewMode} />
 
         {mode === "view" && manager && (
           <div className="bg-gray-50 p-4 rounded-lg space-y-2">
