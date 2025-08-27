@@ -82,6 +82,9 @@ export default function Customer() {
     const handleExportCSV = () => {
         customerService.exportToCSV(filteredCustomers, "customers.csv");
     };
+    const handleExportExcel = () => {
+        customerService.exportToExcel(filteredCustomers);
+    }
 
     useEffect(() => {
         fetchCustomers();
@@ -121,7 +124,8 @@ export default function Customer() {
                             <summary className="cursor-pointer inline-flex items-center border rounded-lg py-2 px-4 bg-emerald-700 font-medium text-neutral-100 hover:bg-teal-800 transition-colors">Export ↓</summary>
                             <div className="absolute right-0 mt-2 w-64 rounded-md shadow-lg bg-white ring-1 ring-black/25 z-50">
                                 <ul className="py-1">
-                                    <li><button className="w-full text-left px-4 py-2 hover:bg-blue-50" onClick={handleExportCSV}><div className="font-semibold text-gray-800">CSV Export</div><Subtitle>Download customer data</Subtitle></button></li>
+                                    <li><button className="w-full text-left px-4 py-2 hover:bg-blue-50" onClick={handleExportExcel}><div className="font-semibold text-gray-800">Excel Export</div><Subtitle>Stylized customer data</Subtitle></button></li>
+                                    <li><button className="w-full text-left px-4 py-2 hover:bg-blue-50" onClick={handleExportCSV}><div className="font-semibold text-gray-800">CSV Export</div><Subtitle>Plain text customer data</Subtitle></button></li>
                                 </ul>
                             </div>
                         </details>

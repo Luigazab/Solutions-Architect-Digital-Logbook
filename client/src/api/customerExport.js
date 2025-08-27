@@ -6,21 +6,34 @@ export const customerExportService = {
     const workbook = new ExcelJS.Workbook();
     const worksheet = workbook.addWorksheet('Customer Information');
 
+
+    worksheet.mergeCells('B1:C6');
+    worksheet.getCell('B1').fill = {
+      type: 'pattern',
+      pattern: 'solid',
+      fgColor: { argb: 'FF4472C4' }
+    };
+    worksheet.getCell('B1').border = {
+      top: { style: 'thin' },
+      left: { style: 'thin' },
+      bottom: { style: 'thin' },
+      right: { style: 'thin' }
+    };
     // Set up the document header section (rows 1-6)
-    worksheet.mergeCells('C1:E2');
-    worksheet.getCell('C1').value = 'Integrated Management System';
-    worksheet.getCell('C1').alignment = { horizontal: 'center', vertical: 'middle' };
-    worksheet.getCell('C1').font = { bold: true, size: 14 };
-    worksheet.getCell('C1').fill = {
+    worksheet.mergeCells('D1:F2');
+    worksheet.getCell('D1').value = 'Integrated Management System';
+    worksheet.getCell('D1').alignment = { horizontal: 'center', vertical: 'middle' };
+    worksheet.getCell('D1').font = { bold: true, size: 14 };
+    worksheet.getCell('D1').fill = {
       type: 'pattern',
       pattern: 'solid',
       fgColor: { argb: 'FFb4c6e7' }
     };
-    worksheet.mergeCells('C3:E6');
-    worksheet.getCell('C3').value = 'Customer Information';
-    worksheet.getCell('C3').alignment = { horizontal: 'center', vertical: 'middle' };
-    worksheet.getCell('C3').font = { bold: true, size: 22 };
-    worksheet.getCell('C3').fill = {
+    worksheet.mergeCells('D3:F6');
+    worksheet.getCell('D3').value = 'Customer Information';
+    worksheet.getCell('D3').alignment = { horizontal: 'center', vertical: 'middle' };
+    worksheet.getCell('D3').font = { bold: true, size: 22 };
+    worksheet.getCell('D3').fill = {
       type: 'pattern',
       pattern: 'solid',
       fgColor: { argb: 'FFB4C6E7' }
@@ -38,22 +51,27 @@ export const customerExportService = {
 
     metadataFields.forEach((field, index) => {
       const row = index + 1;
-      worksheet.getCell(`F${row}`).value = field;
-      worksheet.getCell(`F${row}`).font = { size: 11 };
-      worksheet.getCell(`F${row}`).fill = {
+      worksheet.getCell(`G${row}`).value = field;
+      worksheet.getCell(`G${row}`).font = { size: 11 };
+      worksheet.getCell(`G${row}`).fill = {
         type: 'pattern',
         pattern: 'solid',
         fgColor: { argb: 'FF4472C4' }
       };
-      worksheet.getCell(`F${row}`).font.color = { argb: 'FFFFFFFF' };
+      worksheet.getCell(`G${row}`).font.color = { argb: 'FF000000' };
       
       // Add borders to metadata cells
-      ['E', 'F', 'G', 'H', 'I', 'J'].forEach(col => {
+      ['F', 'G', 'H', 'I', 'J', 'K'].forEach(col => {
         worksheet.getCell(`${col}${row}`).border = {
           top: { style: 'thin' },
           left: { style: 'thin' },
           bottom: { style: 'thin' },
           right: { style: 'thin' }
+        };
+        worksheet.getCell(`${col}${row}`).fill = {
+          type: 'pattern',
+          pattern: 'solid',
+          fgColor: { argb: 'FF4472C4' }
         };
       });
     });
@@ -61,12 +79,13 @@ export const customerExportService = {
     // Column headers (row 7)
     const headers = [
       { key: '#', header: '#', width: 3 },
+      { key: 'company_name', header: 'Company Name', width: 27 },
       { key: 'address', header: 'Address', width: 99 },
       { key: 'industry', header: 'Industry', width: 22 },
       { key: 'location', header: 'Location', width: 17 },
       { key: 'contact_person', header: 'Contact Person', width: 27 },
       { key: 'designation', header: 'Designation', width: 44 },
-      { key: 'email_address', header: 'Email Address', width: 60 },
+      { key: 'email_address', header: 'Email Address', width: 66 },
       { key: 'contact_number', header: 'Contact Number', width: 21 },
       { key: 'website', header: 'Website', width: 33 },
       { key: 'account_manager', header: 'Account Manager', width: 22 }
@@ -97,13 +116,14 @@ export const customerExportService = {
       };
     });
 
-    // Add data rows starting from row 9
+    // Add data rows starting from row 8
     data.forEach((customer, index) => {
       const row = worksheet.getRow(index + 8);
       
       // Map your customer data to the expected columns
       const rowData = [
         index + 1, // Row number
+        customer.company_name || '',
         customer.address || '',
         customer.industry || '',
         customer.location || '', // Adjust field name as needed
@@ -118,6 +138,7 @@ export const customerExportService = {
       rowData.forEach((value, colIndex) => {
         const cell = row.getCell(colIndex + 1);
         cell.value = value;
+        // cell.alignment = { wrapText:true }; uncomment if want wrapped text
         cell.border = {
           top: { style: 'thin' },
           left: { style: 'thin' },
@@ -137,25 +158,22 @@ export const customerExportService = {
     });
 
     // Add borders to the main table area
-    const tableRange = `A8:J${data.length + 9}`;
+    const tableRange = `A8:K${data.length + 9}`;
     const range = worksheet.getCell(tableRange.split(':')[0]).address + ':' + 
                  worksheet.getCell(tableRange.split(':')[1]).address;
+  
     
     // Style the blue sidebar (column A, rows 1-6)
     for (let row = 1; row <= 6; row++) {
-      const cell = worksheet.getCell(`A${row}:B${row}`);
+      const cell = worksheet.getCell(`A${row}`);
       cell.fill = {
         type: 'pattern',
         pattern: 'solid',
         fgColor: { argb: 'FF4472C4' }
       };
-      cell.border = {
-        top: { style: 'thin' },
-        left: { style: 'thin' },
-        bottom: { style: 'thin' },
-        right: { style: 'thin' }
-      };
+      cell.border = {right: { style: 'thin' }};
     }
+    
 
     // Generate and download the file
     const buffer = await workbook.xlsx.writeBuffer();
@@ -171,49 +189,5 @@ export const customerExportService = {
     a.click();
     document.body.removeChild(a);
     window.URL.revokeObjectURL(url);
-  }
-};
-
-// Updated customerService with Excel export
-export const customerService = {
-  // ... your existing methods ...
-
-  async exportToExcel(data, filename = 'Customer_Information.xlsx') {
-    return customerExportService.exportToExcel(data, filename);
-  },
-
-  // Keep your existing exportToCSV method
-  exportToCSV(data, filename) {
-    if (!data.length) return;
-    
-    const csvRows = [];
-    const headers = Object.keys(data[0]).filter(key => 
-      !key.includes('account_manager') && !key.includes('_profile')
-    );
-    headers.push('account_manager_name', 'account_manager_department');
-    csvRows.push(headers.join(","));
-    
-    for (const row of data) {
-      const values = headers.map(h => {
-        if (h === 'account_manager_name') {
-          return `"${row.account_manager?.name || ""}"`;
-        }
-        if (h === 'account_manager_department') {
-          return `"${row.account_manager?.position || ""}"`;
-        }
-        return `"${row[h] ?? ""}"`;
-      });
-      csvRows.push(values.join(","));
-    }
-    
-    const blob = new Blob([csvRows.join("\n")], { type: "text/csv" });
-    const url = window.URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.setAttribute("hidden", "");
-    a.setAttribute("href", url);
-    a.setAttribute("download", filename);
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
   }
 };
