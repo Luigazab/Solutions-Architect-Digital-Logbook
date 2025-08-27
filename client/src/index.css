@@ -72,33 +72,34 @@
 
   /* Global transition for smooth theme switch */
   * {
-    @apply transition-colors duration-200 ease-in-out;
+    @apply transition-colors duration-300 ease-in-out;
   }
 
   button {
     @apply cursor-pointer;
   }
   /* Scrollbar styling for WebKit browsers */
-  *::-webkit-scrollbar {
-    width: 8px;
-  }
+  
 
-  *::-webkit-scrollbar-track {
-    background: linear-gradient(to bottom, #56b3ff, #e0e0e0);
-    border-radius: 9999px;
-  }
+}
+*::-webkit-scrollbar {
+  width: 8px;
+}
 
-  *::-webkit-scrollbar-thumb {
-    background-color: rgba(255, 153, 0, 0.897);
-    border-radius: 9999px;
-    border: 2px solid transparent;
-    background-clip: content-box;
-  }
+*::-webkit-scrollbar-track {
+  background: linear-gradient(to bottom, #56b3ff, #e0e0e0);
+  border-radius: 9999px;
+}
 
-  /* Optional: Firefox support */
-  * {
-    scrollbar-width: thin;
-    scrollbar-color: rgba(255, 153, 0, 0.897) transparent;
-  }
+*::-webkit-scrollbar-thumb {
+  background-color: rgba(255, 153, 0, 0.897);
+  border-radius: 9999px;
+  border: 2px solid transparent;
+  background-clip: content-box;
+}
 
+/* Optional: Firefox support */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 153, 0, 0.897) transparent;
 }

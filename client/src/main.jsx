@@ -17,12 +17,14 @@ import AddMember from './pages/AddMember.jsx';
 import Profile from './pages/Profile.jsx';
 import Loader from './components/Loader.jsx';
 import Setting from './pages/Setting.jsx';
+import {ToastContainer} from 'react-toastify';
 
 document.documentElement.setAttribute('data-theme', 'light');// Set default theme
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
     <BrowserRouter>
+    <ToastContainer position="top-right" autoClose={3000} hideProgressBar={false} newestOnTop={false} closeOnClick rtl={false} pauseOnFocusLoss draggable pauseOnHover theme="colored" />
       <Routes>
         <Route path="/auth" element={<Auth />}>
           <Route index element={<Login/>} />
