@@ -1,4 +1,5 @@
 import { supabase } from "../supabaseClient";
+import { customerExportService } from "./customerExport";
 
 export const customerService = {
   async enrichWithProfiles(data, userIdFields = ['added_by', 'updated_by']) {
@@ -125,6 +126,10 @@ export const customerService = {
         String(value || "").toLowerCase().includes(lowerTerm)
       )
     );
+  },
+
+  async exportToExcel(data, filename = 'Customer_Information.xlsx') {
+    return customerExportService.exportToExcel(data, filename);
   },
 
   exportToCSV(data, filename) {
