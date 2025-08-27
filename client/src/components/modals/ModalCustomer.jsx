@@ -93,6 +93,27 @@ export default function ModalCustomer({ isOpen, onClose, customer=null, mode="ad
       setLoading(false);
     }
   };
+  const handleDelete = async () => {
+    if (!customer?.id) return;
+    const confirmDelete = window.confirm(
+      `Are you sure you want to delete "${customer.company_name}"? This action cannot be undone.`
+    );
+    
+    if (!confirmDelete) return;
+    
+    setLoading(true);
+    try {
+      const { error } = await supabase.from("customers").delete().eq('id', customer.id);
+      
+      if (error) throw error;
+      
+      onClose();
+    } catch (error) {
+      alert(`Error deleting customer: ${error.message}`);
+    } finally {
+      setLoading(false);
+    }
+  };
 
 
   const getTitle = () => {
@@ -180,17 +201,24 @@ export default function ModalCustomer({ isOpen, onClose, customer=null, mode="ad
             </div>
           </div>
         )}
-        <div className="flex justify-end gap-2 mt-4">
-          <button type="button" onClick={handleClose} className="px-4 py-2 bg-gray-300 rounded hover:scale-99">Cancel</button>
-          {isViewMode ? (
-            <button type="button" onClick={() => setIsEditing(true)} className="px-4 py-2 bg-sky-600 hover:bg-sky-700 text-white rounded">
-              Edit Customer
+        <div className="flex justify-between gap-2 mt-4">
+          <div>
+            {mode === "view" && !loading &&(
+              <button type="button" onClick={handleDelete} className= "px-4 py-2 bg-rose-600 hover:bg-rose-700 text-white rounded" disabled={loading}>Delete</button>
+            )}
+          </div>
+          <div className="flex gap-2">
+            <button type="button" onClick={handleClose} className="px-4 py-2 bg-gray-300 rounded hover:scale-99">Cancel</button>
+            {isViewMode ? (
+              <button type="button" onClick={(e) => {e.preventDefault(); setIsEditing(true);}} className="px-4 py-2 bg-sky-600 hover:bg-sky-700 text-white rounded">
+                Edit Customer
+              </button>
+            ) : (
+            <button type="submit" className="px-4 py-2 bg-sky-950 hover:scale-99 text-white rounded" disabled={loading}>
+              {loading ? (mode === "add" ? "Creating..." : "Updating...") : (mode === "add" ? "Create Customer" : "Update Customer")}
             </button>
-          ) : (
-          <button type="submit" className="px-4 py-2 bg-sky-950 hover:scale-99 text-white rounded" disabled={loading}>
-            {loading ? (mode === "add" ? "Creating..." : "Updating...") : (mode === "add" ? "Create Customer" : "Update Customer")}
-          </button>
-          )}
+            )}
+          </div>
         </div>
       </form>
     </Modal>

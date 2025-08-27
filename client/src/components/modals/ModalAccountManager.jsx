@@ -58,11 +58,42 @@ export default function ModalAccountManager({ isOpen, onClose, manager = null, m
     }
   }
 
+  async function handleDelete() {
+    if (!manager?.id) return;
+    const confirmDelete = window.confirm(
+      `Are you sure you want to delete "${manager.name}"? This action cannot be undone.`
+    );
+
+    if(!confirmDelete) return;
+
+    setLoading(true);
+    try{
+      const {error} = await supabase.from("account_managers").delete().eq('id', manager.id);
+
+      if(error) throw error;
+
+      onClose();
+    }catch(error){
+      alert(`Error deleting account manager: ${error.message}`);
+    }finally{
+      setLoading(false);
+    }
+  }
+
   const getTitle = () => {
     if(mode==="add") return "Add a new account manager";
     if(isEditing) return "Edit account manager";
     return "Account Manager Details"
   }
+  const formatDate = (dateString) => {
+    return new Date(dateString).toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+  };
 
   const isViewMode = mode === "view" && !isEditing;
 
@@ -78,7 +109,7 @@ export default function ModalAccountManager({ isOpen, onClose, manager = null, m
             <div className="grid grid-cols-2 gap-4 text-sm">
               <div>
                 <span className="font-medium text-gray-600">Created:</span>
-                <p className="text-gray-900">{new Date(manager.created_at).toLocaleDateString()}</p>
+                <p className="text-gray-900">{formatDate(manager.created_at)}</p>
               </div>
               <div>
                 <span className="font-medium text-gray-600">Created by:</span>
@@ -88,7 +119,7 @@ export default function ModalAccountManager({ isOpen, onClose, manager = null, m
                 <>
                   <div>
                     <span className="font-medium text-gray-600">Updated:</span>
-                    <p className="text-gray-900">{new Date(manager.updated_at).toLocaleDateString()}</p>
+                    <p className="text-gray-900">{formatDate(manager.updated_at)}</p>
                   </div>
                   <div>
                     <span className="font-medium text-gray-600">Updated by:</span>
@@ -100,13 +131,20 @@ export default function ModalAccountManager({ isOpen, onClose, manager = null, m
           </div>
         )}
 
-        <div className="flex justify-end gap-2 mt-4">
-          <button type="button" onClick={handleClose} className="px-4 py-2 bg-gray-300 rounded">Cancel</button>
-          {isViewMode ? (
-            <button type="button" onClick={() => setIsEditing(true)} className="px-4 py-2 bg-sky-600 hover:scale-99 text-white rounded">Edit</button>
-          ) : (
-            <button type="submit" className="px-4 py-2 bg-sky-950 hover:scale-99 text-white rounded" disabled={loading}> {loading ? "Creating..." : mode === "add" ? "Create Account Manager" : "Update Account Manager"}</button>
-          )}
+        <div className="flex justify-between gap-2 mt-4">
+          <div>
+            {mode === "view" && !loading &&(
+              <button type="button" onClick={handleDelete} className= "px-4 py-2 bg-rose-600 hover:bg-rose-700 text-white rounded" disabled={loading}>Delete</button>
+            )}
+          </div>
+          <div className="flex gap-2">
+            <button type="button" onClick={handleClose} className="px-4 py-2 bg-gray-300 rounded">Cancel</button>
+            {isViewMode ? (
+              <button type="button" onClick={(e) => {e.preventDefault(); setIsEditing(true);}} className="px-4 py-2 bg-sky-600 hover:scale-99 text-white rounded">Edit</button>
+            ) : (
+              <button type="submit" className="px-4 py-2 bg-sky-950 hover:scale-99 text-white rounded" disabled={loading}> {loading ? "Creating..." : mode === "add" ? "Create Account Manager" : "Update Account Manager"}</button>
+            )}
+          </div>
         </div>
       </form>
     </Modal>

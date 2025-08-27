@@ -107,15 +107,20 @@ export default function AddMember() {
                     <TextInput htmlFor="password" type="password" label={"Password *"} name="password" id="password" value={formData.password} onChange={handleInputChange} minlength={6} placeholder={"Enter password (min 6 characters)"} required={true}></TextInput>
                     <TextInput htmlFor="contact_number" type="tel" label={"Contact Number"} name="contact_number" id="contact_number" value={formData.contact_number} onChange={handleInputChange} placeholder={"Enter contact number"}></TextInput>
                     <TextInput htmlFor="title" label={"Job Title"} name="title" id="title" value={formData.title} onChange={handleInputChange} placeholder={"Enter job title"}></TextInput>
-                    <SelectField htmlFor="department" label={"Department"} name="department" value={formData.department} onChange={handleInputChange} selectmessage={"Select Department"}
+                    <SelectField htmlFor="department" label={"Department"} name="department" value={formData.department} onChange={handleInputChange} selectmessage={"Select Department"} allowEmpty={false}
                         options={[
-                            { value: "Engineering", label: "Engineering" },
-                            { value: "Marketing", label: "Marketing" },
-                            { value: "Sales", label: "Sales" },
-                            { value: "HR", label: "Human Resources" },
-                            { value: "Finance", label: "Finance" },
-                            { value: "Operations", label: "Operations" },
-                            { value: "Customer Support", label: "Customer Support" }
+                            { value: "Executive Office Department", label: "Executive Office Department" },
+                            { value: "Administrative Office Department", label: "Administrative Office Department" },
+                            { value: "Human Resource Department", label: "Human Resource Department" },
+                            { value: "Finance & Accounting Department", label: "Finance & Accounting Department" },
+                            { value: "Purchasing Department", label: "Purchasing Department" },
+                            { value: "Marketing Department", label: "Marketing Department" },
+                            { value: "Sales Force Department", label: "Sales Force Department" },
+                            { value: "Warehouse & Logistics Department", label: "Warehouse & Logistics Department" },
+                            { value: "Data Center Facilities Department", label: "Data Center Facilities Department" },
+                            { value: "MIaaS Cloud Department", label: "MIaaS Cloud Department" },
+                            { value: "Technical Services Department", label: "Technical Services Department" },
+                            { value: "Product/Solutions Management", label: "Product/Solutions Management" },
                     ]}/>
                     
                     {/* Solutions Architect Checkbox */}
@@ -129,7 +134,9 @@ export default function AddMember() {
                             className="w-4 h-4 text-sky-950 bg-gray-100 border-gray-300 rounded focus:ring-sky-950 focus:ring-2"
                         />
                         <label htmlFor="is_solarch" className="text-sm font-medium text-gray-700">
-                            Solutions Architect
+                            Solutions Architect?
+                            <br />
+                            <span className="text-xs text-gray-500">Check to add user to activity tracking</span>
                         </label>
                     </div>
 
