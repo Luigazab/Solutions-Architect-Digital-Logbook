@@ -7,6 +7,8 @@ import SelectField from '../components/Dropdown';
 import { getPreviewClass } from '../utils/colors';
 import { Link } from 'react-router-dom';
 import ModalAccountManager from '../components/modals/ModalAccountManager';
+import ModalUser from '../components/modals/ModalUser';
+import ModalCategory from '../components/modals/ModalCategory';
 
 
 export default function Dashboard() {
@@ -20,6 +22,10 @@ export default function Dashboard() {
   const [loading, setLoading] = useState(false);
   const [showModal, setShowModal] = useState(false);
   const [newCategory, setNewCategory] = useState({ id: '', category_name: '', color: 'blue' });
+  const [showModalCategory, setShowModalCategory] = useState(false);
+  const [selectedCategory, setSelectedCategory] = useState(null);
+  const [showModalUser, setShowModalUser] = useState(false);
+  const [selectedUser, setSelectedUser] = useState(null);
 
   // Fetch profiles
   const fetchProfiles = async () => {
@@ -132,6 +138,27 @@ export default function Dashboard() {
     setSelectedManager(manager);
     setShowModalAccountManager(true);
   };
+  const handleUserModalClose = () => {
+    setShowModalUser(false);
+    setSelectedUser(null);
+    fetchProfiles();
+  };
+
+  const handleViewUser = (user) => {
+    setSelectedUser(user);
+    setShowModalUser(true);
+  };
+
+  const handleCategoryModalClose = () => {
+    setShowModalCategory(false);
+    setSelectedCategory(null);
+    fetchCategories();
+  };
+
+  const handleViewCategory = (category) => {
+    setSelectedCategory(category);
+    setShowModalCategory(true);
+  };
 
   const ProfilesTable = () => (
     <div>
@@ -156,7 +183,7 @@ export default function Dashboard() {
           </thead>
           <tbody className="divide-y divide-gray-200">
             {profiles.map((profile) => (
-              <tr key={profile.id} className="hover:bg-blue-50">
+              <tr key={profile.id} onClick={() => handleViewUser(profile)} className="hover:bg-blue-50 cursor-pointer transition-colors duration-150">
                 <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{profile.full_name}</td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{profile.title}</td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{profile.email}</td>
@@ -239,7 +266,7 @@ export default function Dashboard() {
     <div>
       <div className="mb-4 flex justify-between items-center">
         <h3 className="text-lg font-medium text-gray-900">Categories</h3>
-        <button onClick={() => setShowModal(true)} className="bg-sky-950 text-white px-4 py-2 rounded-lg hover:scale-99 flex items-center gap-2">
+        <button onClick={() => setShowModal(true)}  className="bg-sky-950 text-white px-4 py-2 rounded-lg hover:scale-99 flex items-center gap-2">
           Add Category
         </button>
       </div>
@@ -255,7 +282,7 @@ export default function Dashboard() {
           </thead>
           <tbody className="divide-y divide-gray-200">
             {categories.map((category) => (
-              <tr key={category.id} className="hover:bg-blue-50">
+              <tr key={category.id} className="hover:bg-blue-50" onClick={() => handleViewCategory(category)}>
                 <td className="px-6 py-4 whitespace-nowrap text-sm font-mono text-gray-900">{category.id}</td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{category.category_name}</td>
                 <td className="px-6 py-4 whitespace-nowrap">
@@ -321,7 +348,8 @@ export default function Dashboard() {
         </div>
       </div>
       <ModalAccountManager isOpen={showModalAccountManager} onClose={handleAccountManagerModalClose} manager={selectedManager} mode={modalMode} />
-
+      <ModalUser isOpen={showModalUser} onClose={handleUserModalClose} user={selectedUser} />
+      <ModalCategory isOpen={showModalCategory} onClose={handleCategoryModalClose} category={selectedCategory} />
       {/* Add Category Modal */}
       {showModal && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
