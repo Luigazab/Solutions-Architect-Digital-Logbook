@@ -417,7 +417,7 @@ export default function ActivityCalendar() {
   }
 
   return (
-    <div className="p-2 md:p-6 grid grid-cols-1 lg:grid-cols-[2fr_1fr] gap-6">
+    <div className="grid grid-cols-1 lg:grid-cols-[2fr_1fr] gap-6">
       <div className="bg-white border rounded-lg p-6 shadow-sm">
         <CalendarNav currentMonth={month.toLocaleString("default", { month: "long", year: "numeric" })} onPrev={() => navigateMonth('prev')} onToday={() => navigateMonth('today')} onNext={() => navigateMonth('next')} loading={loading}/>
         <CalendarGrid days={calendarData} today={new Date()} onSelect={fetchDayActivities} selectedDate={selectedDate}/>
